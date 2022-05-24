@@ -1,9 +1,11 @@
 package main.java.main;
 
 import main.java.config.ConfigParser;
+import main.java.config.Config;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        ConfigParser configParser = new ConfigParser();
+        Config config = ConfigParser.parse();
+        System.out.println(config.instructionQueueLength);
     }
 }
