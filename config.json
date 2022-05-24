@@ -1,11 +1,11 @@
 {
     "instructionQueueLength": 3,
     "numberOfFloatingPointRegisters": 5,
-    "addressRelated": {
+    "buffers": {
         "numberOfLoadBuffers": 3,
         "numberOfStoreBuffers": 3
     },
-    "reservationStationsRelated": {
+    "reservationStations": {
         "numberOfMulStations": 2,
         "numberOfAddStations": 3
     }
