@@ -1,17 +1,18 @@
-package main.java.core;
+package main.java.core.instructions;
 
 import java.util.Objects;
 
+import main.java.core.components.FPRegister;
 import main.java.events.Observable;
 
 public class RTypeInstruction extends Observable {
-    public final Operation operation;
+    public final RTypeInstruction.Op operation;
     public final FPRegister destinationRegister;
     public final FPRegister firstOperand;
     public final FPRegister secondOperand;
 
     public RTypeInstruction(
-        Operation operation,
+        RTypeInstruction.Op operation,
         FPRegister destinationRegister, 
         FPRegister firstOperand,
         FPRegister secondOperand
@@ -25,5 +26,18 @@ public class RTypeInstruction extends Observable {
     @Override
     protected void taskCompleted() {
         System.out.println("completed!");
+    }
+
+    public static enum Op {
+        ADD("ADD"),
+        SUB("SUB"),
+        DIV("DIV"),
+        MUL("MUL");
+
+        public final String representation;
+
+        private Op(String representation) {
+            this.representation = representation;
+        }
     }
 }
