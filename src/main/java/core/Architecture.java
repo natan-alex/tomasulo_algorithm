@@ -19,8 +19,8 @@ public class Architecture {
     private FPRegister[] createAndInitRegisters(int numberOfRegisters) {
         var registers = new FPRegister[numberOfRegisters];
 
-        for (int i = 1; i <= numberOfRegisters; i++) {
-            registers[i] = new FPRegister("R" + i);
+        for (int i = 0; i < numberOfRegisters; i++) {
+            registers[i] = new FPRegister("R" + (i + 1));
         }
 
         return registers;
