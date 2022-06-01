@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.Map;
 
 import org.json.simple.JSONValue;
 import org.json.simple.JSONObject;
@@ -52,10 +50,11 @@ public class ConfigParser {
         var numberOfMulStations = getValueFromJsonObjectOrThrow(stationsSection, NUMBER_OF_MUL_STATIONS_KEY, Long.class);
         var numberOfAddStations = getValueFromJsonObjectOrThrow(stationsSection, NUMBER_OF_ADD_STATIONS_JSON_KEY, Long.class);
 
-        return new Config(instructionQueueLength,
-            numberOfFloatingPointRegisters,
-            numberOfLoadBuffers, numberOfStoreBuffers,
-            numberOfAddStations, numberOfMulStations);
+        return new Config(
+            instructionQueueLength.intValue(),
+            numberOfFloatingPointRegisters.intValue(),
+            numberOfLoadBuffers.intValue(), numberOfStoreBuffers.intValue(),
+            numberOfAddStations.intValue(), numberOfMulStations.intValue());
     }
 
     private static <T> T getValueFromJsonObjectOrThrow(JSONObject obj, String jsonKey, Class<T> castTo) throws Exception {

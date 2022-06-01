@@ -1,20 +1,20 @@
 package main.java.config;
 
 public class Config {
-    public final long instructionQueueLength;
-    public final long numberOfFloatingPointRegisters;
-    public final long numberOfLoadBuffers;
-    public final long numberOfStoreBuffers;
-    public final long numberOfAddStations;
-    public final long numberOfMulStations;
+    public final int instructionQueueLength;
+    public final int numberOfFloatingPointRegisters;
+    public final int numberOfLoadBuffers;
+    public final int numberOfStoreBuffers;
+    public final int numberOfAddStations;
+    public final int numberOfMulStations;
 
     public Config(
-        long instructionQueueLength, 
-        long numberOfFloatingPointRegisters,
-        long numberOfLoadBuffers,
-        long numberOfStoreBuffers,
-        long numberOfAddStations,
-        long numberOfMulStations
+        int instructionQueueLength, 
+        int numberOfFloatingPointRegisters,
+        int numberOfLoadBuffers,
+        int numberOfStoreBuffers,
+        int numberOfAddStations,
+        int numberOfMulStations
     ) {
         this.instructionQueueLength = requirePositiveNumber(instructionQueueLength, "instructionQueueLength");
         this.numberOfFloatingPointRegisters = requirePositiveNumber(numberOfFloatingPointRegisters, "numberOfFloatingPointRegisters");
@@ -24,7 +24,7 @@ public class Config {
         this.numberOfMulStations = requirePositiveNumber(numberOfMulStations, "numberOfMulStations");
     }
 
-    private static long requirePositiveNumber(long number, String argName) {
+    private static int requirePositiveNumber(int number, String argName) {
         if (number < 0) {
             throw new IllegalArgumentException(argName + " cannot be negative");
         }

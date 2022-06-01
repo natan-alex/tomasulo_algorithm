@@ -22,7 +22,7 @@ public abstract class Observable {
         taskCompleted();
 
         for (var observer : observers) {
-            observer.reactToUpdate();
+            observer.observableHasCompletedTheTask();
         }
     }
 }

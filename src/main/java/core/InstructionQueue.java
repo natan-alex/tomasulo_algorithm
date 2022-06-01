@@ -2,7 +2,7 @@ package main.java.core;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.ArrayDeque;
 
 import main.java.events.Observer;
 
@@ -14,7 +14,7 @@ public class InstructionQueue implements Observer {
             throw new Exception("Invalid queue length: must be positive and greater than 0");
         }
 
-        instructions = new LinkedBlockingQueue<RTypeInstruction>(queueLength);
+        instructions = new ArrayDeque<RTypeInstruction>(queueLength);
     }
 
     public void addInstruction(RTypeInstruction instruction) {
@@ -24,7 +24,7 @@ public class InstructionQueue implements Observer {
     }
 
     @Override
-    public void reactToUpdate() {
+    public void observableHasCompletedTheTask() {
         System.out.println("schedule next instruction");
     }
 }
