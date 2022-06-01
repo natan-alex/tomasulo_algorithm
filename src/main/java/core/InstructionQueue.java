@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.ArrayDeque;
 
+import main.java.core.instructions.RTypeInstruction;
 import main.java.events.Observer;
 
 public class InstructionQueue implements Observer {

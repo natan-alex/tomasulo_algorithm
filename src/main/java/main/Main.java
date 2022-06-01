@@ -2,10 +2,9 @@ package main.java.main;
 
 import main.java.config.ConfigParser;
 import main.java.core.Architecture;
-import main.java.core.FPRegister;
 import main.java.core.InstructionQueue;
-import main.java.core.Operation;
-import main.java.core.RTypeInstruction;
+import main.java.core.components.FPRegister;
+import main.java.core.instructions.RTypeInstruction;
 import main.java.config.Config;
 
 public class Main {
@@ -15,7 +14,7 @@ public class Main {
         FPRegister destination = new FPRegister("D");
 
         RTypeInstruction instruction = new RTypeInstruction(
-            Operation.ADD, 
+            RTypeInstruction.Op.ADD, 
             destination,
             r1,
             r2
