@@ -6,6 +6,8 @@ import main.java.config.Config;
 import main.java.core.components.FPRegister;
 
 public class Architecture {
+    private static final String REGISTER_PREFIX = "R";
+
     public final InstructionQueue instructionQueue;
     public final FPRegister[] registers;
 
@@ -20,7 +22,7 @@ public class Architecture {
         var registers = new FPRegister[numberOfRegisters];
 
         for (int i = 0; i < numberOfRegisters; i++) {
-            registers[i] = new FPRegister("R" + (i + 1));
+            registers[i] = new FPRegister(REGISTER_PREFIX + (i + 1));
         }
 
         return registers;
