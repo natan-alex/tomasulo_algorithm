@@ -4,6 +4,7 @@ import main.java.config.ConfigParser;
 import main.java.core.Architecture;
 import main.java.core.InstructionQueue;
 import main.java.core.components.FPRegister;
+import main.java.core.instructions.Operation;
 import main.java.core.instructions.RTypeInstruction;
 import main.java.config.Config;
 
@@ -14,7 +15,7 @@ public class Main {
         FPRegister destination = new FPRegister("D");
 
         RTypeInstruction instruction = new RTypeInstruction(
-            RTypeInstruction.Op.ADD, 
+            Operation.ADD, 
             destination,
             r1,
             r2
