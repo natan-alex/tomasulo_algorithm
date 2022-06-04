@@ -6,38 +6,33 @@ import main.java.core.components.FPRegister;
 import main.java.events.Observable;
 
 public class RTypeInstruction extends Observable {
-    public final RTypeInstruction.Op operation;
+    public final Operation operation;
     public final FPRegister destinationRegister;
     public final FPRegister firstOperand;
     public final FPRegister secondOperand;
 
     public RTypeInstruction(
-        RTypeInstruction.Op operation,
+        Operation operation,
         FPRegister destinationRegister, 
         FPRegister firstOperand,
         FPRegister secondOperand
-    ) {
-        this.operation = operation;
+    ) throws Exception {
+        this.operation = requireRTypeInstructionOperation(operation);
         this.destinationRegister = Objects.requireNonNull(destinationRegister);
         this.firstOperand = Objects.requireNonNull(firstOperand);
         this.secondOperand = Objects.requireNonNull(secondOperand);
     }
 
+    private static Operation requireRTypeInstructionOperation(Operation op) throws Exception {
+        if (op.instructionType != InstructionType.R) {
+            throw new Exception("Invalid operation: should be one operation that matches R type instructions");
+        }
+
+        return op;
+    }
+
     @Override
     protected void taskCompleted() {
         System.out.println("completed!");
-    }
-
-    public static enum Op {
-        ADD("ADD"),
-        SUB("SUB"),
-        DIV("DIV"),
-        MUL("MUL");
-
-        public final String representation;
-
-        private Op(String representation) {
-            this.representation = representation;
-        }
     }
 }
