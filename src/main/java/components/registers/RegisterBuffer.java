@@ -1,45 +1,80 @@
 package main.java.components.registers;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RegisterBuffer implements RegisterManager {
     public static final String REGISTER_NAME_PREFIX = "F";
 
-    private final FPRegister[] registers;
+    private final Map<FPRegister, Optional<String>> registersAndStations;
 
     public RegisterBuffer(int numberOfRegisters) {
         if (numberOfRegisters <= 0) {
             throw new IllegalArgumentException("The number of registers must be positive and greather than 0");
         }
 
-        registers = createAndInitRegisters(numberOfRegisters);
+        registersAndStations = createAndInitRegisters(numberOfRegisters);
     }
 
-    private static FPRegister[] createAndInitRegisters(int numberOfRegisters) {
-        var registers = new FPRegister[numberOfRegisters];
+    private static Map<FPRegister, Optional<String>> createAndInitRegisters(int numberOfRegisters) {
+        var registers = new HashMap<FPRegister, Optional<String>>(numberOfRegisters);
 
         for (int i = 0; i < numberOfRegisters; i++) {
-            registers[i] = new FPRegister(REGISTER_NAME_PREFIX + (i + 1));
+            registers.put(
+                new FPRegister(REGISTER_NAME_PREFIX + (i + 1)),
+                Optional.<String>empty()
+            );
         }
 
         return registers;
     }
 
-    @Override
-    public void setValueForRegister(int index, double value) throws IndexOutOfBoundsException {
-        validateIndex(index);
-        registers[index].value = value;
+    private Map.Entry<FPRegister, Optional<String>> getRegisterWithNameOrThrow(String name) {
+        var register = registersAndStations.entrySet().stream()
+            .filter(e -> e.getKey().name.equalsIgnoreCase(name))
+            .findFirst();
+
+        return register.orElseThrow();
     }
 
     @Override
-    public Optional<Double> getValueFromRegister(int index) throws IndexOutOfBoundsException {
-        validateIndex(index);
-        return Optional.ofNullable(registers[index].value);
+    public void setValueForRegister(String registerName, double value) {
+        var register = getRegisterWithNameOrThrow(registerName);
+
+        register.getKey().value = value;
     }
-    
-    private void validateIndex(int index) throws IndexOutOfBoundsException {
-        if (index < 0 || index > registers.length) {
-            throw new IndexOutOfBoundsException("The index " + index + " is not valid");
+
+    @Override
+    public void markRegisterAsWaitingResult(String registerName, String reservationStationName) {
+        Objects.requireNonNull(reservationStationName);
+
+        var register = getRegisterWithNameOrThrow(registerName);
+
+        register.setValue(Optional.of(reservationStationName));
+    }
+
+    @Override
+    public Optional<Double> getValueFromRegister(String registerName) {
+        var register = getRegisterWithNameOrThrow(registerName);
+
+        if (register.getValue().isPresent()) {
+            return Optional.empty();
         }
+
+        return Optional.of(register.getKey().value);
+    }
+
+    @Override
+    public boolean isRegisterWaiting(String registerName) {
+        return getRegisterWithNameOrThrow(registerName)
+            .getValue()
+            .isPresent();
+    }
+
+    @Override
+    public Optional<String> getStationThatWillProduceValueFor(String registerName) {
+        return getRegisterWithNameOrThrow(registerName).getValue();
     }
 }
