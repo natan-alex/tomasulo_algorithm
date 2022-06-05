@@ -2,7 +2,7 @@ package main.java.components.registers;
 
 import java.util.Optional;
 
-public interface RegisterManager {
+public interface RegistrarManager {
     void setValueForRegister(String registerName, double value);
 
     void markRegisterAsWaitingResult(String registerName, String reservationStationName);

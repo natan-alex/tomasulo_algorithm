@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public class RegisterBuffer implements RegisterManager {
+public class RegistrarBuffer implements RegistrarManager {
     public static final String REGISTER_NAME_PREFIX = "F";
 
     private final Map<FPRegister, Optional<String>> registersAndStations;
 
-    public RegisterBuffer(int numberOfRegisters) {
+    public RegistrarBuffer(int numberOfRegisters) {
         if (numberOfRegisters <= 0) {
             throw new IllegalArgumentException("The number of registers must be positive and greather than 0");
         }
@@ -23,7 +23,7 @@ public class RegisterBuffer implements RegisterManager {
 
         for (int i = 0; i < numberOfRegisters; i++) {
             registers.put(
-                new FPRegister(REGISTER_NAME_PREFIX + (i + 1)),
+                new FPRegister(REGISTER_NAME_PREFIX + i),
                 Optional.<String>empty()
             );
         }
