@@ -12,17 +12,25 @@ public class Main {
 
         var architecture = new Architecture(config);
 
-        var r0 = new FPRegister("R0");
-        var r1 = new FPRegister("R1");
-        var r2 = new FPRegister("R2");
+        var r0 = new FPRegister("F0");
+        var r1 = new FPRegister("F1");
+        var r2 = new FPRegister("F2");
 
-        var instruction = new RTypeInstruction(
+        var i0 = new RTypeInstruction(
             Operation.ADD,
             r0, r1, r2
         );
 
-        architecture.schedule(instruction);
+        var i1 = new RTypeInstruction(
+            Operation.ADD,
+            r1, r0, r2
+        );
+
+        architecture.schedule(i0);
+        architecture.schedule(i1);
 
         architecture.startExecution();
+
+        architecture.showReservationStations();
     }
 }
