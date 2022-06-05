@@ -16,4 +16,12 @@ public enum Operation {
         this.representation = representation;
         this.relatedInstructionType = relatedInstructionType;
     }
+
+    public boolean isAddOrSub() {
+        return this == ADD || this == SUB;
+    }
+
+    public boolean isMulOrDiv() {
+        return this == MUL || this == DIV;
+    }
 }
