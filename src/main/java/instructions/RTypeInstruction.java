@@ -21,4 +21,20 @@ public class RTypeInstruction extends Instruction {
         this.firstOperand = Objects.requireNonNull(firstOperand);
         this.secondOperand = Objects.requireNonNull(secondOperand);
     }
+
+    @Override
+    public String toStringRepresentation() {
+        var builder = new StringBuilder();
+
+        builder
+            .append(operation.representation)
+            .append(" ")
+            .append(destination.name)
+            .append(" ")
+            .append(firstOperand.name)
+            .append(" ")
+            .append(secondOperand.name);
+
+        return builder.toString();
+    }
 }

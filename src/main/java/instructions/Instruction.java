@@ -33,4 +33,11 @@ public abstract class Instruction {
     public State getState() {
         return state;
     }
+
+    public abstract String toStringRepresentation();
+
+    @Override
+    public String toString() {
+        return toStringRepresentation();
+    }
 }
