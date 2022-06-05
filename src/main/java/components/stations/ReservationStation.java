@@ -9,8 +9,8 @@ public class ReservationStation {
     public final String name;
     public final Operation[] operations;
     public boolean isBusy;
-    public FPRegister firstSourceOperand;
-    public FPRegister secondSourceOperand;
+    public Double firstOperandValue;
+    public Double secondOperandValue;
     public String firstStationThatWillProduceValue;
     public String secondStationThatWillProduceValue;
     public Object immediateOrAddress;
@@ -19,8 +19,8 @@ public class ReservationStation {
         this.name = Objects.requireNonNull(name);
         this.operations = Objects.requireNonNull(operations);
         this.isBusy = false;
-        this.firstSourceOperand = null;
-        this.secondSourceOperand = null;
+        this.firstOperandValue = null;
+        this.secondOperandValue = null;
         this.firstStationThatWillProduceValue = null;
         this.secondStationThatWillProduceValue = null;
         this.immediateOrAddress = null;
