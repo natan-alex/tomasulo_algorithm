@@ -12,10 +12,10 @@ public class RegisterBuffer implements RegisterManager {
             throw new IllegalArgumentException("The number of registers must be positive and greather than 0");
         }
 
-        registers = createRegisters(numberOfRegisters);
+        registers = createAndInitRegisters(numberOfRegisters);
     }
 
-    private static FPRegister[] createRegisters(int numberOfRegisters) {
+    private static FPRegister[] createAndInitRegisters(int numberOfRegisters) {
         var registers = new FPRegister[numberOfRegisters];
 
         for (int i = 0; i < numberOfRegisters; i++) {
@@ -34,7 +34,7 @@ public class RegisterBuffer implements RegisterManager {
     @Override
     public Optional<Number> getValueFromRegister(int index) throws IndexOutOfBoundsException {
         validateIndex(index);
-        return Optional.of(registers[index].value);
+        return Optional.ofNullable(registers[index].value);
     }
     
     private void validateIndex(int index) throws IndexOutOfBoundsException {
