@@ -7,7 +7,7 @@ import main.java.instructions.Operation;
 
 public class ReservationStation {
     public final String name;
-    public final Operation operation;
+    public final Operation[] operations;
     public boolean isBusy;
     public FPRegister firstSourceOperand;
     public FPRegister secondSourceOperand;
@@ -15,9 +15,9 @@ public class ReservationStation {
     public String secondStationThatWillProduceValue;
     public Object immediateOrAddress;
 
-    public ReservationStation(String name, Operation operation) {
+    public ReservationStation(String name, Operation[] operations) {
         this.name = Objects.requireNonNull(name);
-        this.operation = operation;
+        this.operations = Objects.requireNonNull(operations);
         this.isBusy = false;
         this.firstSourceOperand = null;
         this.secondSourceOperand = null;
