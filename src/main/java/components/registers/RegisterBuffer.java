@@ -26,13 +26,13 @@ public class RegisterBuffer implements RegisterManager {
     }
 
     @Override
-    public void setValueForRegister(int index, Number value) throws IndexOutOfBoundsException {
+    public void setValueForRegister(int index, double value) throws IndexOutOfBoundsException {
         validateIndex(index);
         registers[index].value = value;
     }
 
     @Override
-    public Optional<Number> getValueFromRegister(int index) throws IndexOutOfBoundsException {
+    public Optional<Double> getValueFromRegister(int index) throws IndexOutOfBoundsException {
         validateIndex(index);
         return Optional.ofNullable(registers[index].value);
     }

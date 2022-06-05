@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class FPRegister {
     public final String name;
-    public Number value;
+    public double value;
 
     public FPRegister(String name) {
         this.name = Objects.requireNonNull(name);
