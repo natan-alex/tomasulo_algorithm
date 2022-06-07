@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 
-public class RegistrarBuffer implements RegistrarManager {
+public class RegistrarBuffer {
     public static final String REGISTER_NAME_PREFIX = "F";
 
     private final Map<FPRegister, Optional<String>> registersAndStations;
@@ -16,6 +17,14 @@ public class RegistrarBuffer implements RegistrarManager {
         }
 
         registersAndStations = createAndInitRegisters(numberOfRegisters);
+    }
+
+    public void setRandomValuesInRegisters() {
+        var random = new Random();
+
+        for (var register : registersAndStations.keySet()) {
+            register.value = random.nextDouble() * 5;
+        }
     }
 
     private static Map<FPRegister, Optional<String>> createAndInitRegisters(int numberOfRegisters) {
@@ -39,14 +48,12 @@ public class RegistrarBuffer implements RegistrarManager {
         return register.orElseThrow();
     }
 
-    @Override
     public void setValueForRegister(String registerName, double value) {
         var register = getRegisterWithNameOrThrow(registerName);
 
         register.getKey().value = value;
     }
 
-    @Override
     public void markRegisterAsWaitingResult(String registerName, String reservationStationName) {
         Objects.requireNonNull(reservationStationName);
 
@@ -55,7 +62,6 @@ public class RegistrarBuffer implements RegistrarManager {
         register.setValue(Optional.of(reservationStationName));
     }
 
-    @Override
     public Optional<Double> getValueFromRegister(String registerName) {
         var register = getRegisterWithNameOrThrow(registerName);
 
@@ -66,14 +72,12 @@ public class RegistrarBuffer implements RegistrarManager {
         return Optional.of(register.getKey().value);
     }
 
-    @Override
     public boolean isRegisterWaiting(String registerName) {
         return getRegisterWithNameOrThrow(registerName)
             .getValue()
             .isPresent();
     }
 
-    @Override
     public Optional<String> getStationThatWillProduceValueFor(String registerName) {
         return getRegisterWithNameOrThrow(registerName).getValue();
     }
