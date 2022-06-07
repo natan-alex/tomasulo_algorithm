@@ -5,10 +5,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 
-import main.java.instructions.Instruction;
+import main.java.instructions.RTypeInstruction;
 
 public class InstructionQueue {
-    private final Queue<Instruction> instructions;
+    private final Queue<RTypeInstruction> instructions;
 
     public InstructionQueue(int length) {
         if (length <= 0) {
@@ -18,12 +18,12 @@ public class InstructionQueue {
         instructions = new ArrayDeque<>(length);
     }
 
-    public void enqueue(Instruction instruction) {
+    public void enqueue(RTypeInstruction instruction) {
         Objects.requireNonNull(instruction);
         instructions.add(instruction);
     }
 
-    public Optional<Instruction> dispatch() {
+    public Optional<RTypeInstruction> dispatch() {
         return Optional.ofNullable(instructions.poll());
     }
 }
