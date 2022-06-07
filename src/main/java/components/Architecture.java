@@ -2,7 +2,8 @@ package main.java.components;
 
 import java.util.Objects;
 
-import main.java.components.registers.RegistrarBuffer;
+import main.java.components.registers.RegistrarBank;
+import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.ReservationStationManager;
 import main.java.config.Config;
 import main.java.instructions.RTypeInstruction;
@@ -10,14 +11,17 @@ import main.java.instructions.RTypeInstruction;
 public class Architecture {
     private final ReservationStationManager stationsManager;
     private final InstructionQueue instructionQueue;
-    private final RegistrarBuffer registrarBuffer;
+    private final RegistrarBank registrarBank;
+    private final ReorderBuffer reorderBuffer;
 
     public Architecture(Config config) {
         stationsManager = new ReservationStationManager(config.numberOfAddStations, config.numberOfMulStations);
         instructionQueue = new InstructionQueue(config.instructionQueueLength);
 
-        registrarBuffer = new RegistrarBuffer(config.numberOfFloatingPointRegisters);
-        registrarBuffer.setRandomValuesInRegisters();
+        registrarBank = new RegistrarBank(config.numberOfFloatingPointRegisters);
+        registrarBank.setRandomValuesInRegisters();
+
+        reorderBuffer = new ReorderBuffer(registrarBank.getRegistrarNames());
     }
 
     public void schedule(RTypeInstruction instruction) {
@@ -29,7 +33,7 @@ public class Architecture {
         var nextInstruction = instructionQueue.dispatch();
 
         while (nextInstruction.isPresent()) {
-            tryAllocateInANotBusyStation(nextInstruction.get());
+            tryStoreInANotBusyStation(nextInstruction.get());
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -39,7 +43,7 @@ public class Architecture {
         }
     }
 
-    private boolean tryAllocateInANotBusyStation(RTypeInstruction instruction) {
+    private boolean tryStoreInANotBusyStation(RTypeInstruction instruction) {
         var result = stationsManager.getNotBusyStationForOperation(instruction.operation);
 
         if (result.isEmpty()) {
@@ -48,21 +52,21 @@ public class Architecture {
         }
 
         var station = result.get();
+        station.isBusy = true;
 
-        if (registrarBuffer.isRegisterWaiting(instruction.firstOperand.name)) {
-            var stationName = registrarBuffer.getStationThatWillProduceValueFor(instruction.firstOperand.name);
-            station.firstStationThatWillProduceValue = stationName.get();
+        var firstOperandNewName = reorderBuffer.getRegisterNewName(instruction.firstOperand.name);
+        var secondOperandNewName = reorderBuffer.getRegisterNewName(instruction.secondOperand.name);
+
+        if (firstOperandNewName.isPresent()) {
+            station.firstStationThatWillProduceValue = firstOperandNewName.get();
         } else {
-            var value = registrarBuffer.getValueFromRegister(instruction.firstOperand.name);
-            station.firstOperandValue = value.get();
+            station.firstOperandValue = registrarBank.getRegisterValue(instruction.firstOperand.name);
         }
 
-        if (registrarBuffer.isRegisterWaiting(instruction.secondOperand.name)) {
-            var stationName = registrarBuffer.getStationThatWillProduceValueFor(instruction.secondOperand.name);
-            station.secondStationThatWillProduceValue = stationName.get();
+        if (secondOperandNewName.isPresent()) {
+            station.secondStationThatWillProduceValue = secondOperandNewName.get();
         } else {
-            var value = registrarBuffer.getValueFromRegister(instruction.secondOperand.name);
-            station.secondOperandValue = value.get();
+            station.secondOperandValue = registrarBank.getRegisterValue(instruction.secondOperand.name);
         }
 
         return true;
