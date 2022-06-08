@@ -28,19 +28,19 @@ public class RegistrarBank {
         var random = new Random();
 
         for (var register : registers) {
-            register.value = (random.nextDouble() + 5) % 20;
+            register.setValue((random.nextDouble() + 5) % 20);
         }
     }
 
     public String[] getRegistrarNames() {
         return Arrays.stream(registers)
-                .map(r -> r.name)
+                .map(r -> r.getName())
                 .toArray(String[]::new);
     }
 
     private FPRegister getRegisterWithNameOrThrow(String name) {
         var result = Arrays.stream(registers)
-                .filter(e -> e.name.equalsIgnoreCase(name))
+                .filter(e -> e.getName().equalsIgnoreCase(name))
                 .findFirst();
 
         return result.orElseThrow();
@@ -49,12 +49,12 @@ public class RegistrarBank {
     public void setValueForRegister(String registerName, double value) {
         var register = getRegisterWithNameOrThrow(registerName);
 
-        register.value = value;
+        register.setValue(value);
     }
 
     public double getRegisterValue(String registerName) {
         var register = getRegisterWithNameOrThrow(registerName);
 
-        return register.value;
+        return register.getValue();
     }
 }

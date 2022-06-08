@@ -44,7 +44,7 @@ public class Architecture {
     }
 
     private boolean tryStoreInANotBusyStation(RTypeInstruction instruction) {
-        var result = stationsManager.getNotBusyStationForOperation(instruction.operation);
+        var result = stationsManager.getNotBusyStationForOperation(instruction.getOperation());
 
         if (result.isEmpty()) {
             System.out.println("All busy");
@@ -52,21 +52,23 @@ public class Architecture {
         }
 
         var station = result.get();
-        station.isBusy = true;
+        station.setBusy(true);
 
-        var firstOperandNewName = reorderBuffer.getRegisterNewName(instruction.firstOperand.name);
-        var secondOperandNewName = reorderBuffer.getRegisterNewName(instruction.secondOperand.name);
+        var firstOperandName = instruction.getFirstOperand().getName();
+        var secondOperandName = instruction.getSecondOperand().getName();
+        var firstOperandNewName = reorderBuffer.getNewNameForRegister(firstOperandName);
+        var secondOperandNewName = reorderBuffer.getNewNameForRegister(secondOperandName);
 
         if (firstOperandNewName.isPresent()) {
-            station.firstStationThatWillProduceValue = firstOperandNewName.get();
+            station.setFirstStationThatWillProduceValue(firstOperandNewName.get());
         } else {
-            station.firstOperandValue = registrarBank.getRegisterValue(instruction.firstOperand.name);
+            station.setFirstOperandValue(registrarBank.getRegisterValue(firstOperandName));
         }
 
         if (secondOperandNewName.isPresent()) {
-            station.secondStationThatWillProduceValue = secondOperandNewName.get();
+            station.setSecondStationThatWillProduceValue(secondOperandNewName.get());
         } else {
-            station.secondOperandValue = registrarBank.getRegisterValue(instruction.secondOperand.name);
+            station.setSecondOperandValue(registrarBank.getRegisterValue(secondOperandName));
         }
 
         return true;

@@ -5,10 +5,10 @@ import java.util.Objects;
 import main.java.components.registers.FPRegister;
 
 public class RTypeInstruction {
-    public final Operation operation;
-    public final FPRegister destination;
-    public final FPRegister firstOperand;
-    public final FPRegister secondOperand;
+    private final Operation operation;
+    private final FPRegister destination;
+    private final FPRegister firstOperand;
+    private final FPRegister secondOperand;
 
     public RTypeInstruction(
         Operation operation,
@@ -22,16 +22,32 @@ public class RTypeInstruction {
         this.secondOperand = Objects.requireNonNull(secondOperand);
     }
 
+    public Operation getOperation() {
+        return operation;
+    }
+
+    public FPRegister getDestination() {
+        return destination;
+    }
+
+    public FPRegister getSecondOperand() {
+        return secondOperand;
+    }
+
+    public FPRegister getFirstOperand() {
+        return firstOperand;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
             .append(operation.representation)
             .append(" ")
-            .append(destination.name)
+            .append(destination.getName())
             .append(" ")
-            .append(firstOperand.name)
+            .append(firstOperand.getName())
             .append(" ")
-            .append(secondOperand.name)
+            .append(secondOperand.getName())
             .toString();
     }
 }

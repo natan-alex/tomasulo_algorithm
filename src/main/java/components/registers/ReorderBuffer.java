@@ -24,7 +24,7 @@ public class ReorderBuffer {
         return registrarNames;
     }
 
-    public Optional<String> getRegisterNewName(String registerName) {
+    public Optional<String> getNewNameForRegister(String registerName) {
         Objects.requireNonNull(registerName);
 
         if (!originalAndCurrentNamesOfRegistrars.containsKey(registerName)) {

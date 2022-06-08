@@ -37,11 +37,11 @@ public class ReservationStationManager {
 
     public void showStations() {
         for (var reservationStation : addReservationStations) {
-            System.out.println(reservationStation.isBusy);
-            System.out.println(reservationStation.firstOperandValue);
-            System.out.println(reservationStation.firstStationThatWillProduceValue);
-            System.out.println(reservationStation.secondOperandValue);
-            System.out.println(reservationStation.secondStationThatWillProduceValue);
+            System.out.println(reservationStation.isBusy());
+            System.out.println(reservationStation.getFirstOperandValue());
+            System.out.println(reservationStation.getFirstStationThatWillProduceValue());
+            System.out.println(reservationStation.getSecondOperandValue());
+            System.out.println(reservationStation.getSecondStationThatWillProduceValue());
             System.out.println();
         }
     }
@@ -54,7 +54,7 @@ public class ReservationStationManager {
         }
 
         return Arrays.stream(stationsToLookIn)
-            .filter(s -> !s.isBusy)
+            .filter(s -> !s.isBusy())
             .findFirst();
     }
 }
