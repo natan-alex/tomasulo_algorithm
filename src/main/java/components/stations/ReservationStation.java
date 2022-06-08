@@ -3,11 +3,13 @@ package main.java.components.stations;
 import java.util.Objects;
 import java.util.Optional;
 
+import main.java.components.units.FunctionalUnit;
 import main.java.instructions.Operation;
 
 public class ReservationStation {
     private final String name;
     private final Operation operation;
+    private final FunctionalUnit relatedUnit;
     private boolean isBusy;
     private Double firstOperandValue;
     private Double secondOperandValue;
@@ -15,9 +17,10 @@ public class ReservationStation {
     private String secondStationThatWillProduceValue;
     private Object immediateOrAddress;
 
-    public ReservationStation(String name, Operation operation) {
+    public ReservationStation(String name, Operation operation, FunctionalUnit relatedUnit) {
         this.name = Objects.requireNonNull(name);
         this.operation = operation;
+        this.relatedUnit = Objects.requireNonNull(relatedUnit);
         this.isBusy = false;
         this.firstOperandValue = null;
         this.secondOperandValue = null;
@@ -86,8 +89,8 @@ public class ReservationStation {
 
     private void runIfAllOperandsAreAvailable() {
         if (firstOperandValue != null && secondOperandValue != null) {
-            // call functional unit
             System.out.println("all operands available, should run!");
+            relatedUnit.execute(firstOperandValue, secondOperandValue);
         } else {
             // wait more...
         }
