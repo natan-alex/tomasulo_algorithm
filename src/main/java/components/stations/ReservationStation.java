@@ -1,6 +1,7 @@
 package main.java.components.stations;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import main.java.instructions.Operation;
 
@@ -8,8 +9,8 @@ public class ReservationStation {
     private final String name;
     private final Operation operation;
     private boolean isBusy;
-    private double firstOperandValue;
-    private double secondOperandValue;
+    private Double firstOperandValue;
+    private Double secondOperandValue;
     private String firstStationThatWillProduceValue;
     private String secondStationThatWillProduceValue;
     private Object immediateOrAddress;
@@ -18,8 +19,8 @@ public class ReservationStation {
         this.name = Objects.requireNonNull(name);
         this.operation = operation;
         this.isBusy = false;
-        this.firstOperandValue = 0.0;
-        this.secondOperandValue = 0.0;
+        this.firstOperandValue = null;
+        this.secondOperandValue = null;
         this.firstStationThatWillProduceValue = null;
         this.secondStationThatWillProduceValue = null;
         this.immediateOrAddress = null;
@@ -41,43 +42,54 @@ public class ReservationStation {
         this.isBusy = isBusy;
     }
 
-    public double getFirstOperandValue() {
-        return firstOperandValue;
+    public Optional<Double> getFirstOperandValue() {
+        return Optional.ofNullable(firstOperandValue);
     }
 
     public void setFirstOperandValue(double firstOperandValue) {
         this.firstOperandValue = firstOperandValue;
+        runIfAllOperandsAreAvailable();
     }
 
-    public double getSecondOperandValue() {
-        return secondOperandValue;
+    public Optional<Double> getSecondOperandValue() {
+        return Optional.ofNullable(secondOperandValue);
     }
 
     public void setSecondOperandValue(double secondOperandValue) {
         this.secondOperandValue = secondOperandValue;
+        runIfAllOperandsAreAvailable();
     }
 
-    public String getFirstStationThatWillProduceValue() {
-        return firstStationThatWillProduceValue;
+    public Optional<String> getFirstStationThatWillProduceValue() {
+        return Optional.ofNullable(firstStationThatWillProduceValue);
     }
 
     public void setFirstStationThatWillProduceValue(String firstStationThatWillProduceValue) {
         this.firstStationThatWillProduceValue = firstStationThatWillProduceValue;
     }
 
-    public String getSecondStationThatWillProduceValue() {
-        return secondStationThatWillProduceValue;
+    public Optional<String> getSecondStationThatWillProduceValue() {
+        return Optional.ofNullable(secondStationThatWillProduceValue);
     }
 
     public void setSecondStationThatWillProduceValue(String secondStationThatWillProduceValue) {
         this.secondStationThatWillProduceValue = secondStationThatWillProduceValue;
     }
 
-    public Object getImmediateOrAddress() {
-        return immediateOrAddress;
+    public Optional<Object> getImmediateOrAddress() {
+        return Optional.ofNullable(immediateOrAddress);
     }
 
     public void setImmediateOrAddress(Object immediateOrAddress) {
         this.immediateOrAddress = immediateOrAddress;
+    }
+
+    private void runIfAllOperandsAreAvailable() {
+        if (firstOperandValue != null && secondOperandValue != null) {
+            // call functional unit
+            System.out.println("all operands available, should run!");
+        } else {
+            // wait more...
+        }
     }
 }
