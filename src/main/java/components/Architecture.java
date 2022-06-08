@@ -8,23 +8,28 @@ import java.util.function.Consumer;
 import main.java.components.registers.RegistrarBank;
 import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.ReservationStation;
-// import main.java.components.stations.ReservationStationManager;
+import main.java.components.units.AddFunctionalUnit;
+import main.java.components.units.FunctionalUnit;
 import main.java.config.Config;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
 
 public class Architecture {
-    // private final ReservationStationManager stationsManager;
     private final ReservationStation[] addReservationStations;
     private final ReservationStation[] mulReservationStations;
+    private final FunctionalUnit[] fpAdders;
+    private final FunctionalUnit[] fpMultipliers;
     private final InstructionQueue instructionQueue;
     private final RegistrarBank registrarBank;
     private final ReorderBuffer reorderBuffer;
 
     public Architecture(Config config) {
-        // stationsManager = new ReservationStationManager(config.numberOfAddStations, config.numberOfMulStations);
-        addReservationStations = createAndInitReservationStations(config.numberOfAddStations, Operation.ADD);
-        mulReservationStations = createAndInitReservationStations(config.numberOfMulStations, Operation.MUL);
+        fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
+        addReservationStations = new ReservationStation[config.numberOfAddStations];
+        initAddersAndRelatedStations();
+
+        fpMultipliers = null;
+        mulReservationStations = null;
 
         instructionQueue = new InstructionQueue(config.instructionQueueLength);
 
@@ -34,17 +39,16 @@ public class Architecture {
         reorderBuffer = new ReorderBuffer(registrarBank.getRegistrarNames());
     }
 
-    private ReservationStation[] createAndInitReservationStations(int length, Operation operation) {
-        var stations = new ReservationStation[length];
+    private void initAddersAndRelatedStations() {
+        for (int i = 0; i < addReservationStations.length; i++) {
+            fpAdders[i] = new AddFunctionalUnit();
 
-        for (int i = 0; i < length; i++) {
-            stations[i] = new ReservationStation(
-                operation.representation + i,
-                operation
+            addReservationStations[i] = new ReservationStation(
+                Operation.ADD.representation + i,
+                Operation.ADD,
+                fpAdders[i]
             );
         }
-
-        return stations;
     }
 
     public void schedule(RTypeInstruction instruction) {
@@ -121,6 +125,6 @@ public class Architecture {
         };
         
         Arrays.stream(addReservationStations).forEach(consumer);
-        Arrays.stream(mulReservationStations).forEach(consumer);
+        // Arrays.stream(mulReservationStations).forEach(consumer);
     }
 }
