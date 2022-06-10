@@ -3,10 +3,12 @@ package main.java.components.stations;
 import java.util.Objects;
 import java.util.Optional;
 
+import main.java.components.busses.BusObserver;
 import main.java.components.units.FunctionalUnit;
 import main.java.instructions.Operation;
+import main.java.instructions.RTypeInstruction;
 
-public class ReservationStation {
+public class ReservationStation implements BusObserver {
     private final String name;
     private final Operation operation;
     private final FunctionalUnit relatedUnit;
@@ -41,58 +43,65 @@ public class ReservationStation {
         return isBusy;
     }
 
-    public void setBusy(boolean isBusy) {
-        this.isBusy = isBusy;
-    }
+    public void storeInstruction(
+            RTypeInstruction instruction,
+            Optional<String> firstOperandNewName,
+            Optional<String> secondOperandNewName) {
+        if (isBusy) {
+            throw new IllegalStateException("Trying to store instruction " + instruction + " in busy station.");
+        }
 
-    public Optional<Double> getFirstOperandValue() {
-        return Optional.ofNullable(firstOperandValue);
-    }
+        isBusy = true;
 
-    public void setFirstOperandValue(double firstOperandValue) {
-        this.firstOperandValue = firstOperandValue;
-        runIfAllOperandsAreAvailable();
-    }
-
-    public Optional<Double> getSecondOperandValue() {
-        return Optional.ofNullable(secondOperandValue);
-    }
-
-    public void setSecondOperandValue(double secondOperandValue) {
-        this.secondOperandValue = secondOperandValue;
-        runIfAllOperandsAreAvailable();
-    }
-
-    public Optional<String> getFirstStationThatWillProduceValue() {
-        return Optional.ofNullable(firstStationThatWillProduceValue);
-    }
-
-    public void setFirstStationThatWillProduceValue(String firstStationThatWillProduceValue) {
-        this.firstStationThatWillProduceValue = firstStationThatWillProduceValue;
-    }
-
-    public Optional<String> getSecondStationThatWillProduceValue() {
-        return Optional.ofNullable(secondStationThatWillProduceValue);
-    }
-
-    public void setSecondStationThatWillProduceValue(String secondStationThatWillProduceValue) {
-        this.secondStationThatWillProduceValue = secondStationThatWillProduceValue;
-    }
-
-    public Optional<Object> getImmediateOrAddress() {
-        return Optional.ofNullable(immediateOrAddress);
-    }
-
-    public void setImmediateOrAddress(Object immediateOrAddress) {
-        this.immediateOrAddress = immediateOrAddress;
-    }
-
-    private void runIfAllOperandsAreAvailable() {
-        if (firstOperandValue != null && secondOperandValue != null) {
-            System.out.println("all operands available, should run!");
-            relatedUnit.execute(firstOperandValue, secondOperandValue);
+        if (firstOperandNewName.isPresent()) {
+            firstStationThatWillProduceValue = firstOperandNewName.get();
         } else {
-            // wait more...
+            firstOperandValue = instruction.getFirstOperand().getValue().get();
+        }
+
+        if (secondOperandNewName.isPresent()) {
+            secondStationThatWillProduceValue = secondOperandNewName.get();
+        } else {
+            secondOperandValue = instruction.getSecondOperand().getValue().get();
+        }
+
+        runIfAllOperandsAreAvailable(instruction.getDestination().getName());
+    }
+
+    @Override
+    public void reactToBroadcastedValue(double value, String destinationRegisterName) {
+        Objects.requireNonNull(destinationRegisterName);
+
+        if (firstStationThatWillProduceValue != null &&
+                firstStationThatWillProduceValue.equalsIgnoreCase(destinationRegisterName)) {
+            firstOperandValue = value;
+
+            System.out.println("LOG from " + name + " station:");
+            System.out.println("\tUsing broadcasted value " + value + " for first operand.");
+
+            runIfAllOperandsAreAvailable(destinationRegisterName);
+        }
+
+        if (secondStationThatWillProduceValue != null
+                && secondStationThatWillProduceValue.equalsIgnoreCase(destinationRegisterName)) {
+            secondOperandValue = value;
+
+            System.out.println("LOG from " + name + " station:");
+            System.out.println("\tUsing broadcasted value " + value + " for second operand.");
+
+            runIfAllOperandsAreAvailable(destinationRegisterName);
+        }
+    }
+
+    private void runIfAllOperandsAreAvailable(String destinationRegisterName) {
+        if (firstOperandValue != null && secondOperandValue != null) {
+            System.out.println("LOG from " + name + " station:");
+            System.out.print("\tAll operands available: ");
+            System.out.print("<< " + firstOperandValue + " >> and ");
+            System.out.print("<< " + secondOperandValue + " >> . ");
+            System.out.println("Passing to functional unit.");
+
+            relatedUnit.execute(firstOperandValue, secondOperandValue, destinationRegisterName);
         }
     }
 }

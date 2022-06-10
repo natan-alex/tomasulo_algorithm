@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import main.java.components.busses.CommonDataBus;
+import main.java.components.busses.DataBus;
 import main.java.components.registers.RegistrarBank;
 import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.ReservationStation;
@@ -22,8 +24,11 @@ public class Architecture {
     private final InstructionQueue instructionQueue;
     private final RegistrarBank registrarBank;
     private final ReorderBuffer reorderBuffer;
+    private final DataBus commonDataBus;
 
     public Architecture(Config config) {
+        commonDataBus = new CommonDataBus();
+
         fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
         addReservationStations = new ReservationStation[config.numberOfAddStations];
         initAddersAndRelatedStations();
@@ -37,17 +42,24 @@ public class Architecture {
         registrarBank.setRandomValuesInRegisters();
 
         reorderBuffer = new ReorderBuffer(registrarBank.getRegistrarNames());
+
+        addObserversToCommonDataBus();
+    }
+
+    private void addObserversToCommonDataBus() {
+        commonDataBus.addObserver(registrarBank);
+        commonDataBus.addObserver(reorderBuffer);
+        Arrays.stream(addReservationStations).forEach(s -> commonDataBus.addObserver(s));
     }
 
     private void initAddersAndRelatedStations() {
         for (int i = 0; i < addReservationStations.length; i++) {
-            fpAdders[i] = new AddFunctionalUnit();
+            fpAdders[i] = new AddFunctionalUnit(commonDataBus);
 
             addReservationStations[i] = new ReservationStation(
-                Operation.ADD.representation + i,
-                Operation.ADD,
-                fpAdders[i]
-            );
+                    Operation.ADD.getRepresentation() + i,
+                    Operation.ADD,
+                    fpAdders[i]);
         }
     }
 
@@ -60,15 +72,24 @@ public class Architecture {
         var nextInstruction = instructionQueue.dispatch();
 
         while (nextInstruction.isPresent()) {
-            System.out.println("Trying to execute << " + nextInstruction.get() + " >>");
+            var instruction = nextInstruction.get();
+
+            System.out.println("\nLOG from architecture:");
+            System.out.println("\tExecuting << " + instruction + " >>\n");
+
+            fetchInstructionOperandValues(instruction);
             tryStoreInAFreeStation(nextInstruction.get());
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             nextInstruction = instructionQueue.dispatch();
         }
+    }
+
+    private void fetchInstructionOperandValues(RTypeInstruction instruction) {
+        var firstOperand = instruction.getFirstOperand();
+        var secondOperand = instruction.getSecondOperand();
+        var firstOperandValue = registrarBank.getRegisterValue(firstOperand.getName());
+        var secondOperandValue = registrarBank.getRegisterValue(secondOperand.getName());
+        firstOperand.setValue(firstOperandValue.get());
+        secondOperand.setValue(secondOperandValue.get());
     }
 
     public Optional<ReservationStation> getNotBusyStationForOperation(Operation operation) {
@@ -79,8 +100,8 @@ public class Architecture {
         }
 
         return Arrays.stream(stationsToLookIn)
-            .filter(s -> !s.isBusy())
-            .findFirst();
+                .filter(s -> !s.isBusy())
+                .findFirst();
     }
 
     private boolean tryStoreInAFreeStation(RTypeInstruction instruction) {
@@ -92,39 +113,19 @@ public class Architecture {
         }
 
         var station = result.get();
-        station.setBusy(true);
-
         var firstOperandName = instruction.getFirstOperand().getName();
         var secondOperandName = instruction.getSecondOperand().getName();
         var firstOperandNewName = reorderBuffer.getNewNameForRegister(firstOperandName);
         var secondOperandNewName = reorderBuffer.getNewNameForRegister(secondOperandName);
 
-        if (firstOperandNewName.isPresent()) {
-            station.setFirstStationThatWillProduceValue(firstOperandNewName.get());
-        } else {
-            station.setFirstOperandValue(registrarBank.getRegisterValue(firstOperandName));
-        }
-
-        if (secondOperandNewName.isPresent()) {
-            station.setSecondStationThatWillProduceValue(secondOperandNewName.get());
-        } else {
-            station.setSecondOperandValue(registrarBank.getRegisterValue(secondOperandName));
-        }
+        reorderBuffer.setNewNameForRegister(instruction.getDestination().getName(), station.getName());
+        station.storeInstruction(instruction, firstOperandNewName, secondOperandNewName);
 
         return true;
     }
 
     public void showReservationStations() {
-        Consumer<ReservationStation> consumer = (reservationStation) -> {
-            System.out.println(reservationStation.isBusy());
-            System.out.println(reservationStation.getFirstOperandValue());
-            System.out.println(reservationStation.getFirstStationThatWillProduceValue());
-            System.out.println(reservationStation.getSecondOperandValue());
-            System.out.println(reservationStation.getSecondStationThatWillProduceValue());
-            System.out.println();
-        };
-        
-        Arrays.stream(addReservationStations).forEach(consumer);
+        Arrays.stream(addReservationStations).forEach(System.out::println);
         // Arrays.stream(mulReservationStations).forEach(consumer);
     }
 }

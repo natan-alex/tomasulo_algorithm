@@ -1,9 +1,13 @@
 package main.java.components.registers;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
-public class RegistrarBank {
+import main.java.components.busses.BusObserver;
+
+public class RegistrarBank implements BusObserver {
     public static final String REGISTER_NAME_PREFIX = "F";
 
     private final FPRegister[] registers;
@@ -19,16 +23,26 @@ public class RegistrarBank {
     }
 
     private void initRegisters() {
+        System.out.println("LOG from registrar bank:");
+        System.out.print("\tAll registers: ");
+
         for (int i = 0; i < registers.length; i++) {
             registers[i] = new FPRegister(REGISTER_NAME_PREFIX + i);
+            System.out.print(registers[i].getName() + "  ");
         }
+
+        System.out.println();
     }
 
     public void setRandomValuesInRegisters() {
+        System.out.println("LOG from registrar bank:");
+        System.out.println("\tSetting values for registers:");
+
         var random = new Random();
 
         for (var register : registers) {
-            register.setValue((random.nextDouble() + 5) % 20);
+            register.setValue(5 + 10 * random.nextDouble());
+            System.out.println("\t\t" + register.getName() + " -> " + register.getValue().get());
         }
     }
 
@@ -38,23 +52,41 @@ public class RegistrarBank {
                 .toArray(String[]::new);
     }
 
-    private FPRegister getRegisterWithNameOrThrow(String name) {
-        var result = Arrays.stream(registers)
+    private Optional<FPRegister> getRegisterWithName(String name) {
+        return Arrays.stream(registers)
                 .filter(e -> e.getName().equalsIgnoreCase(name))
                 .findFirst();
-
-        return result.orElseThrow();
     }
 
     public void setValueForRegister(String registerName, double value) {
-        var register = getRegisterWithNameOrThrow(registerName);
+        var optional = getRegisterWithName(registerName);
+
+        var register = optional.orElseThrow();
 
         register.setValue(value);
     }
 
-    public double getRegisterValue(String registerName) {
-        var register = getRegisterWithNameOrThrow(registerName);
+    public Optional<Double> getRegisterValue(String registerName) {
+        var optional = getRegisterWithName(registerName);
+
+        var register = optional.orElseThrow();
 
         return register.getValue();
+    }
+
+    @Override
+    public void reactToBroadcastedValue(double value, String destinationRegisterName) {
+        Objects.requireNonNull(destinationRegisterName);
+
+        var optional = getRegisterWithName(destinationRegisterName);
+
+        if (optional.isPresent()) {
+            var register = optional.get();
+            register.setValue(value);
+
+            System.out.println("LOG from registrar bank:");
+            System.out.print("\tUsing broadcasted value << " + value + " >>");
+            System.out.println(" to set value for << " + register.getName() + " >> .");
+        }
     }
 }

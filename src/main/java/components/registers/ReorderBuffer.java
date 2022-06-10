@@ -6,7 +6,9 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ReorderBuffer {
+import main.java.components.busses.BusObserver;
+
+public class ReorderBuffer implements BusObserver {
     private final Map<String, Optional<String>> originalAndCurrentNamesOfRegistrars;
 
     public ReorderBuffer(String[] registrarNames) {
@@ -24,13 +26,41 @@ public class ReorderBuffer {
         return registrarNames;
     }
 
-    public Optional<String> getNewNameForRegister(String registerName) {
+    private void throwIfNullOrDoNotExist(String registerName) {
         Objects.requireNonNull(registerName);
 
         if (!originalAndCurrentNamesOfRegistrars.containsKey(registerName)) {
             throw new NoSuchElementException("There is no register with name '" + registerName + "'.");
         }
+    }
+
+    public Optional<String> getNewNameForRegister(String registerName) {
+        throwIfNullOrDoNotExist(registerName);
 
         return originalAndCurrentNamesOfRegistrars.get(registerName);
+    }
+
+    public void setNewNameForRegister(String registerName, String newName) {
+        if (newName == null || newName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid new name for register: cannot be empty or null.");
+        }
+
+        throwIfNullOrDoNotExist(registerName);
+
+        originalAndCurrentNamesOfRegistrars.put(registerName, Optional.of(newName));
+    }
+
+    @Override
+    public void reactToBroadcastedValue(double value, String destinationRegisterName) {
+        Objects.requireNonNull(destinationRegisterName);
+
+        var optional = originalAndCurrentNamesOfRegistrars.get(destinationRegisterName);
+
+        if (optional.isPresent()) {
+            System.out.println("LOG from reorder buffer:");
+            System.out.println("\tMarking << " + destinationRegisterName + " >> as if it was not renamed");
+
+            originalAndCurrentNamesOfRegistrars.put(destinationRegisterName, Optional.empty());
+        }
     }
 }
