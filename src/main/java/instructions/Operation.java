@@ -6,15 +6,22 @@ public enum Operation {
     MUL("MUL", InstructionType.R),
     DIV("DIV", InstructionType.R);
 
-    public final String representation;
-    public final InstructionType relatedInstructionType;
+    private final String representation;
+    private final InstructionType relatedInstructionType;
 
     private Operation(
-        String representation, 
-        InstructionType relatedInstructionType
-    ) {
+            String representation,
+            InstructionType relatedInstructionType) {
         this.representation = representation;
         this.relatedInstructionType = relatedInstructionType;
+    }
+
+    public String getRepresentation() {
+        return representation;
+    }
+
+    public InstructionType getRelatedInstructionType() {
+        return relatedInstructionType;
     }
 
     public boolean isAddOrSub() {

@@ -11,11 +11,10 @@ public class RTypeInstruction {
     private final FPRegister secondOperand;
 
     public RTypeInstruction(
-        Operation operation,
-        FPRegister destination, 
-        FPRegister firstOperand,
-        FPRegister secondOperand
-    ) {
+            Operation operation,
+            FPRegister destination,
+            FPRegister firstOperand,
+            FPRegister secondOperand) {
         this.operation = operation;
         this.destination = Objects.requireNonNull(destination);
         this.firstOperand = Objects.requireNonNull(firstOperand);
@@ -41,13 +40,13 @@ public class RTypeInstruction {
     @Override
     public String toString() {
         return new StringBuilder()
-            .append(operation.representation)
-            .append(" ")
-            .append(destination.getName())
-            .append(" ")
-            .append(firstOperand.getName())
-            .append(" ")
-            .append(secondOperand.getName())
-            .toString();
+                .append(operation.getRepresentation())
+                .append(" ")
+                .append(destination.getName())
+                .append(" ")
+                .append(firstOperand.getName())
+                .append(" ")
+                .append(secondOperand.getName())
+                .toString();
     }
 }
