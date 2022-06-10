@@ -17,20 +17,16 @@ public class Main {
         var r2 = new FPRegister("F2");
 
         var i0 = new RTypeInstruction(
-            Operation.ADD,
-            r0, r1, r2
-        );
+                Operation.ADD,
+                r0, r1, r2);
 
         var i1 = new RTypeInstruction(
-            Operation.ADD,
-            r1, r0, r2
-        );
+                Operation.ADD,
+                r1, r0, r2);
 
         architecture.schedule(i0);
         architecture.schedule(i1);
 
         architecture.startExecution();
-
-        architecture.showReservationStations();
     }
 }
