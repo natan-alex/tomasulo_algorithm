@@ -1,25 +1,26 @@
 package main.java.components.registers;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class FPRegister {
     private final String name;
-    private double value;
+    private Double value;
 
     public FPRegister(String name) {
         this.name = Objects.requireNonNull(name);
-        this.value = 0.0;
+        this.value = null;
     }
 
     public String getName() {
         return name;
     }
 
-    public double getValue() {
-        return value;
+    public Optional<Double> getValue() {
+        return Optional.ofNullable(value);
     }
 
-    public void setValue(double value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
