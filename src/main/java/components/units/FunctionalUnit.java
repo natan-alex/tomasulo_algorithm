@@ -3,6 +3,7 @@ package main.java.components.units;
 import java.util.Objects;
 
 import main.java.components.busses.DataBus;
+import main.java.instructions.RTypeInstruction;
 
 public abstract class FunctionalUnit {
     private Thread thread;
@@ -19,7 +20,7 @@ public abstract class FunctionalUnit {
         this.commonDataBus = Objects.requireNonNull(commonDataBus);
     }
 
-    public abstract double calculateResult(double firstOperand, double secondOperand);
+    public abstract void calculateResultFor(RTypeInstruction instruction);
 
     protected abstract String getUnitName();
 
@@ -41,8 +42,8 @@ public abstract class FunctionalUnit {
         }
     }
 
-    public void execute(double firstOperand, double secondOperand, String destinationRegisterName) {
-        Objects.requireNonNull(destinationRegisterName);
+    public void execute(RTypeInstruction instruction) {
+        Objects.requireNonNull(instruction);
 
         waitThreadIfAlive();
 
@@ -51,11 +52,13 @@ public abstract class FunctionalUnit {
             System.out.println("\tCalculating result...");
             trySleep(cyclesRequiredToPerformOperation * 1000);
 
-            var result = calculateResult(firstOperand, secondOperand);
+            calculateResultFor(instruction);
+
+            var result = instruction.getDestination().getValue().get();
             System.out.println("LOG from " + getUnitName() + ":");
             System.out.println("\tSending result << " + result + " >> to common data bus.");
 
-            commonDataBus.notifyObserversWith(result, destinationRegisterName);
+            commonDataBus.notifyObserversWith(instruction);
         });
 
         thread.run();

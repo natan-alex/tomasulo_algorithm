@@ -1,5 +1,7 @@
 package main.java.components.busses;
 
+import main.java.instructions.RTypeInstruction;
+
 public interface BusObserver {
-    void reactToBroadcastedValue(double value, String destinationRegisterName);
+    void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction);
 }

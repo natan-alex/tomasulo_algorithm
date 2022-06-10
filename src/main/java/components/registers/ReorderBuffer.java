@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import main.java.components.busses.BusObserver;
+import main.java.instructions.RTypeInstruction;
 
 public class ReorderBuffer implements BusObserver {
     private final Map<String, Optional<String>> originalAndCurrentNamesOfRegistrars;
@@ -51,8 +52,11 @@ public class ReorderBuffer implements BusObserver {
     }
 
     @Override
-    public void reactToBroadcastedValue(double value, String destinationRegisterName) {
-        Objects.requireNonNull(destinationRegisterName);
+    public void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction) {
+        Objects.requireNonNull(instruction);
+
+        var destinationRegister = instruction.getDestination();
+        var destinationRegisterName = destinationRegister.getName();
 
         var optional = originalAndCurrentNamesOfRegistrars.get(destinationRegisterName);
 

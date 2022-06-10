@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import main.java.components.busses.BusObserver;
+import main.java.instructions.RTypeInstruction;
 
 public class RegistrarBank implements BusObserver {
     public static final String REGISTER_NAME_PREFIX = "F";
@@ -75,17 +76,20 @@ public class RegistrarBank implements BusObserver {
     }
 
     @Override
-    public void reactToBroadcastedValue(double value, String destinationRegisterName) {
-        Objects.requireNonNull(destinationRegisterName);
+    public void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction) {
+        Objects.requireNonNull(instruction);
 
-        var optional = getRegisterWithName(destinationRegisterName);
+        var destinationRegister = instruction.getDestination();
+        var destinationRegisterValue = destinationRegister.getValue().orElseThrow();
+
+        var optional = getRegisterWithName(destinationRegister.getName());
 
         if (optional.isPresent()) {
             var register = optional.get();
-            register.setValue(value);
+            register.setValue(destinationRegisterValue);
 
             System.out.println("LOG from registrar bank:");
-            System.out.print("\tUsing broadcasted value << " + value + " >>");
+            System.out.print("\tUsing broadcasted value << " + destinationRegisterValue + " >>");
             System.out.println(" to set value for << " + register.getName() + " >> .");
         }
     }

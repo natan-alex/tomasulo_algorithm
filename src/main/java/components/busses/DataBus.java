@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import main.java.instructions.RTypeInstruction;
+
 public abstract class DataBus {
     private final List<BusObserver> observers;
 
@@ -15,11 +17,11 @@ public abstract class DataBus {
         observers.add(Objects.requireNonNull(observer));
     }
 
-    public void notifyObserversWith(double value, String destinationRegisterName) {
-        Objects.requireNonNull(destinationRegisterName);
+    public void notifyObserversWith(RTypeInstruction instruction) {
+        Objects.requireNonNull(instruction);
 
         for (var observer : observers) {
-            observer.reactToBroadcastedValue(value, destinationRegisterName);
+            observer.reactToBroadcastedFinishedInstruction(instruction);
         }
     }
 }

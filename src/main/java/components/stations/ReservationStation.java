@@ -65,35 +65,39 @@ public class ReservationStation implements BusObserver {
             secondOperandValue = instruction.getSecondOperand().getValue().get();
         }
 
-        runIfAllOperandsAreAvailable(instruction.getDestination().getName());
+        runIfAllOperandsAreAvailable(instruction);
     }
 
     @Override
-    public void reactToBroadcastedValue(double value, String destinationRegisterName) {
-        Objects.requireNonNull(destinationRegisterName);
+    public void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction) {
+        Objects.requireNonNull(instruction);
 
-        if (firstStationThatWillProduceValue != null &&
-                firstStationThatWillProduceValue.equalsIgnoreCase(destinationRegisterName)) {
-            firstOperandValue = value;
+        var destinationRegister = instruction.getDestination();
+        var destinationRegisterName = destinationRegister.getName();
+        var destinationRegisterValue = destinationRegister.getValue().get();
+
+        if (firstStationThatWillProduceValue != null
+                && firstStationThatWillProduceValue.equals(destinationRegisterName)) {
+            firstOperandValue = destinationRegisterValue;
 
             System.out.println("LOG from " + name + " station:");
-            System.out.println("\tUsing broadcasted value " + value + " for first operand.");
+            System.out.println("\tUsing broadcasted value " + destinationRegisterValue + " for first operand.");
 
-            runIfAllOperandsAreAvailable(destinationRegisterName);
+            runIfAllOperandsAreAvailable(instruction);
         }
 
         if (secondStationThatWillProduceValue != null
-                && secondStationThatWillProduceValue.equalsIgnoreCase(destinationRegisterName)) {
-            secondOperandValue = value;
+                && secondStationThatWillProduceValue.equals(destinationRegisterName)) {
+            secondOperandValue = destinationRegisterValue;
 
             System.out.println("LOG from " + name + " station:");
-            System.out.println("\tUsing broadcasted value " + value + " for second operand.");
+            System.out.println("\tUsing broadcasted value " + destinationRegisterValue + " for second operand.");
 
-            runIfAllOperandsAreAvailable(destinationRegisterName);
+            runIfAllOperandsAreAvailable(instruction);
         }
     }
 
-    private void runIfAllOperandsAreAvailable(String destinationRegisterName) {
+    private void runIfAllOperandsAreAvailable(RTypeInstruction instruction) {
         if (firstOperandValue != null && secondOperandValue != null) {
             System.out.println("LOG from " + name + " station:");
             System.out.print("\tAll operands available: ");
@@ -101,7 +105,7 @@ public class ReservationStation implements BusObserver {
             System.out.print("<< " + secondOperandValue + " >> . ");
             System.out.println("Passing to functional unit.");
 
-            relatedUnit.execute(firstOperandValue, secondOperandValue, destinationRegisterName);
+            relatedUnit.execute(instruction);
         }
     }
 }
