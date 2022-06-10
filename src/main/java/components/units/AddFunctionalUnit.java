@@ -1,28 +1,19 @@
 package main.java.components.units;
 
-public class AddFunctionalUnit implements FunctionalUnit {
-    private static final int NUMBER_OF_CYCLES = 2;
-    private final Thread thread;
-    private double firstOperand;
-    private double secondOperand;
+import main.java.components.busses.DataBus;
 
-    public AddFunctionalUnit() {
-        this.thread = new Thread(() -> {
-            try {
-                Thread.sleep(NUMBER_OF_CYCLES * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            var result = this.firstOperand + this.secondOperand;
-            // send to common data bus
-            System.out.println("from thread in add unit: " + result);
-        });
+public class AddFunctionalUnit extends FunctionalUnit {
+    public AddFunctionalUnit(DataBus dataBus) {
+        super(2, dataBus);
     }
 
     @Override
-    public void execute(double firstOperand, double secondOperand) {
-        this.firstOperand = firstOperand;
-        this.secondOperand = secondOperand;
-        thread.run();
+    public double calculateResult(double firstOperand, double secondOperand) {
+        return firstOperand + secondOperand;
+    }
+
+    @Override
+    protected String getUnitName() {
+        return "ADD unit";
     }
 }
