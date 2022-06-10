@@ -24,8 +24,13 @@ public class Main {
                 Operation.ADD,
                 r1, r0, r2);
 
+        var i2 = new RTypeInstruction(
+                Operation.SUB,
+                r2, r0, r1);
+
         architecture.schedule(i0);
         architecture.schedule(i1);
+        architecture.schedule(i2);
 
         architecture.startExecution();
     }
