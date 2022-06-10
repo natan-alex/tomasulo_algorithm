@@ -123,9 +123,4 @@ public class Architecture {
 
         return true;
     }
-
-    public void showReservationStations() {
-        Arrays.stream(addReservationStations).forEach(System.out::println);
-        // Arrays.stream(mulReservationStations).forEach(consumer);
-    }
 }
