@@ -7,13 +7,8 @@ import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
 
 public class AddFunctionalUnit extends FunctionalUnit {
-    public AddFunctionalUnit(DataBus dataBus) {
-        super(2, dataBus);
-    }
-
-    @Override
-    protected String getUnitName() {
-        return "ADD unit";
+    public AddFunctionalUnit(String unitName, DataBus dataBus) {
+        super(unitName, 2, dataBus);
     }
 
     @Override
