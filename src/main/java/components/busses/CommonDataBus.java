@@ -8,7 +8,7 @@ public class CommonDataBus extends DataBus {
     public CommonDataBus() {
     }
 
-    public void broadcastFinishedInstruction(RTypeInstruction instruction) {
+    public synchronized void broadcastFinishedInstruction(RTypeInstruction instruction) {
         Objects.requireNonNull(instruction);
 
         var destinationRegister = instruction.getDestination();
