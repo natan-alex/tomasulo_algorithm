@@ -19,6 +19,8 @@ public class ReservationStation implements BusObserver {
     private String secondStationThatWillProduceValue;
     private Object immediateOrAddress;
 
+    private RTypeInstruction instructionBeingExecuted;
+
     public ReservationStation(String name, Operation operation, FunctionalUnit relatedUnit) {
         this.name = Objects.requireNonNull(name);
         this.operation = operation;
@@ -29,6 +31,8 @@ public class ReservationStation implements BusObserver {
         this.firstStationThatWillProduceValue = null;
         this.secondStationThatWillProduceValue = null;
         this.immediateOrAddress = null;
+
+        this.instructionBeingExecuted = null;
     }
 
     public String getName() {
@@ -51,18 +55,20 @@ public class ReservationStation implements BusObserver {
             throw new IllegalStateException("Trying to store instruction " + instruction + " in busy station.");
         }
 
+        System.out.println("instruction " + instruction + " in " + name);
+
         isBusy = true;
 
         if (firstOperandNewName.isPresent()) {
             firstStationThatWillProduceValue = firstOperandNewName.get();
         } else {
-            firstOperandValue = instruction.getFirstOperand().getValue().get();
+            firstOperandValue = instruction.getFirstOperand().getValue().orElseThrow();
         }
 
         if (secondOperandNewName.isPresent()) {
             secondStationThatWillProduceValue = secondOperandNewName.get();
         } else {
-            secondOperandValue = instruction.getSecondOperand().getValue().get();
+            secondOperandValue = instruction.getSecondOperand().getValue().orElseThrow();
         }
 
         runIfAllOperandsAreAvailable(instruction);
@@ -74,30 +80,45 @@ public class ReservationStation implements BusObserver {
 
         var destinationRegister = instruction.getDestination();
         var destinationRegisterName = destinationRegister.getName();
-        var destinationRegisterValue = destinationRegister.getValue().get();
+        var destinationRegisterValue = destinationRegister.getValue().orElseThrow();
+
+        if (instructionBeingExecuted != null && instructionBeingExecuted.equals(instruction)) {
+            clearStation();
+            return;
+        }
 
         if (firstStationThatWillProduceValue != null
                 && firstStationThatWillProduceValue.equals(destinationRegisterName)) {
             firstOperandValue = destinationRegisterValue;
-
-            System.out.println("LOG from " + name + " station:");
-            System.out.println("\tUsing broadcasted value " + destinationRegisterValue + " for first operand.");
-
+            logUsingValueForOperand(destinationRegisterValue, "first operand");
             runIfAllOperandsAreAvailable(instruction);
         }
 
         if (secondStationThatWillProduceValue != null
                 && secondStationThatWillProduceValue.equals(destinationRegisterName)) {
             secondOperandValue = destinationRegisterValue;
-
-            System.out.println("LOG from " + name + " station:");
-            System.out.println("\tUsing broadcasted value " + destinationRegisterValue + " for second operand.");
-
+            logUsingValueForOperand(destinationRegisterValue, "second operand");
             runIfAllOperandsAreAvailable(instruction);
         }
     }
 
+    private void logUsingValueForOperand(double value, String operand) {
+        System.out.println("LOG from " + name + " station:");
+        System.out.println("\tUsing broadcasted value " + value + " for " + operand);
+    }
+
+    private void clearStation() {
+        isBusy = false;
+        firstOperandValue = null;
+        secondOperandValue = null;
+        firstStationThatWillProduceValue = null;
+        secondStationThatWillProduceValue = null;
+        instructionBeingExecuted = null;
+    }
+
     private void runIfAllOperandsAreAvailable(RTypeInstruction instruction) {
+        Objects.requireNonNull(instruction);
+
         if (firstOperandValue != null && secondOperandValue != null) {
             System.out.println("LOG from " + name + " station:");
             System.out.print("\tAll operands available: ");
@@ -105,6 +126,7 @@ public class ReservationStation implements BusObserver {
             System.out.print("<< " + secondOperandValue + " >> . ");
             System.out.println("Passing to functional unit.");
 
+            instructionBeingExecuted = instruction;
             relatedUnit.execute(instruction);
         }
     }
