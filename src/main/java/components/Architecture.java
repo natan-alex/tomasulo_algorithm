@@ -3,8 +3,9 @@ package main.java.components;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
+import main.java.config.Config;
+import main.java.components.busses.BusObserver;
 import main.java.components.busses.CommonDataBus;
 import main.java.components.busses.DataBus;
 import main.java.components.registers.RegistrarBank;
@@ -12,11 +13,10 @@ import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.ReservationStation;
 import main.java.components.units.AddFunctionalUnit;
 import main.java.components.units.FunctionalUnit;
-import main.java.config.Config;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
 
-public class Architecture {
+public class Architecture implements BusObserver {
     private final ReservationStation[] addReservationStations;
     private final ReservationStation[] mulReservationStations;
     private final FunctionalUnit[] fpAdders;
@@ -26,7 +26,11 @@ public class Architecture {
     private final ReorderBuffer reorderBuffer;
     private final DataBus commonDataBus;
 
+    private Thread threadToExecuteInstructions;
+    private int numberOfFinishedInstructions;
+
     public Architecture(Config config) {
+        numberOfFinishedInstructions = 0;
         commonDataBus = new CommonDataBus();
 
         fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
@@ -50,11 +54,14 @@ public class Architecture {
         commonDataBus.addObserver(registrarBank);
         commonDataBus.addObserver(reorderBuffer);
         Arrays.stream(addReservationStations).forEach(s -> commonDataBus.addObserver(s));
+        commonDataBus.addObserver(this);
     }
 
     private void initAddersAndRelatedStations() {
         for (int i = 0; i < addReservationStations.length; i++) {
-            fpAdders[i] = new AddFunctionalUnit(commonDataBus);
+            fpAdders[i] = new AddFunctionalUnit(
+                    Operation.ADD.getRepresentation() + i,
+                    commonDataBus);
 
             addReservationStations[i] = new ReservationStation(
                     Operation.ADD.getRepresentation() + i,
@@ -66,20 +73,35 @@ public class Architecture {
     public void schedule(RTypeInstruction instruction) {
         Objects.requireNonNull(instruction);
         instructionQueue.enqueue(instruction);
+        numberOfFinishedInstructions--;
+    }
+
+    @Override
+    public void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction) {
+        numberOfFinishedInstructions++;
+
+        if (numberOfFinishedInstructions == 0) {
+            threadToExecuteInstructions.notify();
+        }
     }
 
     public void startExecution() {
-        var nextInstruction = instructionQueue.dispatch();
+        threadToExecuteInstructions = new Thread(() -> {
+            for (var instruction : instructionQueue) {
+                System.out.println("\nLOG from architecture:");
+                System.out.println("\tExecuting << " + instruction + " >>\n");
 
-        while (nextInstruction.isPresent()) {
-            var instruction = nextInstruction.get();
+                fetchInstructionOperandValues(instruction);
+                storeInAFreeStation(instruction);
+            }
+        });
 
-            System.out.println("\nLOG from architecture:");
-            System.out.println("\tExecuting << " + instruction + " >>\n");
+        threadToExecuteInstructions.start();
 
-            fetchInstructionOperandValues(instruction);
-            tryStoreInAFreeStation(nextInstruction.get());
-            nextInstruction = instructionQueue.dispatch();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -104,12 +126,12 @@ public class Architecture {
                 .findFirst();
     }
 
-    private boolean tryStoreInAFreeStation(RTypeInstruction instruction) {
+    private void storeInAFreeStation(RTypeInstruction instruction) {
         var result = getNotBusyStationForOperation(instruction.getOperation());
 
         if (result.isEmpty()) {
             System.out.println("All busy");
-            return false;
+            return;
         }
 
         var station = result.get();
@@ -120,7 +142,5 @@ public class Architecture {
 
         reorderBuffer.setNewNameForRegister(instruction.getDestination().getName(), station.getName());
         station.storeInstruction(instruction, firstOperandNewName, secondOperandNewName);
-
-        return true;
     }
 }
