@@ -61,8 +61,7 @@ public class ReorderBuffer implements BusObserver {
         var optional = originalAndCurrentNamesOfRegistrars.get(destinationRegisterName);
 
         if (optional.isPresent()) {
-            System.out.println("LOG from reorder buffer:");
-            System.out.println("\tMarking << " + destinationRegisterName + " >> as if it was not renamed");
+            System.out.println("LOG from reorder buffer:\n\tMarking << " + destinationRegisterName + " >> as if it was not renamed");
 
             originalAndCurrentNamesOfRegistrars.put(destinationRegisterName, Optional.empty());
         }

@@ -7,7 +7,10 @@ import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
 
 public class AddFunctionalUnit extends FunctionalUnit {
-    public AddFunctionalUnit(String unitName, DataBus dataBus) {
+    public AddFunctionalUnit(
+        String unitName, 
+        DataBus dataBus
+    ) {
         super(unitName, 2, dataBus);
     }
 

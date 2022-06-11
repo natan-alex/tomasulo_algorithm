@@ -88,9 +88,7 @@ public class RegistrarBank implements BusObserver {
             var register = optional.get();
             register.setValue(destinationRegisterValue);
 
-            System.out.println("LOG from registrar bank:");
-            System.out.print("\tUsing broadcasted value << " + destinationRegisterValue + " >>");
-            System.out.println(" to set value for << " + register.getName() + " >> .");
+            System.out.println("LOG from registrar bank:\n\tUsing broadcasted value << " + destinationRegisterValue + " >> to set value for << " + register.getName() + " >>");
         }
     }
 }

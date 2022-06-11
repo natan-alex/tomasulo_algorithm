@@ -14,9 +14,7 @@ public class CommonDataBus extends DataBus {
         var destinationRegister = instruction.getDestination();
         var destinationRegisterValue = destinationRegister.getValue().orElseThrow();
 
-        System.out.println("LOG from common data bus:");
-        System.out.print("\tBroadcasting instruction << " + instruction + " >>");
-        System.out.println(" with calculated value << " + destinationRegisterValue + " >> .");
+        System.out.println("LOG from common data bus:\n\tBroadcasting instruction << " + instruction + " >> with calculated value << " + destinationRegisterValue + " >>");
 
         super.notifyObserversWith(instruction);
     }
