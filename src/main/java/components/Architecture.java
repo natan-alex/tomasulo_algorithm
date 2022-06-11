@@ -3,22 +3,24 @@ package main.java.components;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import main.java.config.Config;
-import main.java.components.busses.BusObserver;
 import main.java.components.busses.CommonDataBus;
 import main.java.components.busses.DataBus;
 import main.java.components.registers.RegistrarBank;
 import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.ReservationStation;
+import main.java.components.stations.Station;
 import main.java.components.units.AddFunctionalUnit;
 import main.java.components.units.FunctionalUnit;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
 
-public class Architecture implements BusObserver {
-    private final ReservationStation[] addReservationStations;
-    private final ReservationStation[] mulReservationStations;
+public class Architecture {
+    private final Station[] addReservationStations;
+    private final Station[] mulReservationStations;
     private final FunctionalUnit[] fpAdders;
     private final FunctionalUnit[] fpMultipliers;
     private final InstructionQueue instructionQueue;
@@ -26,11 +28,10 @@ public class Architecture implements BusObserver {
     private final ReorderBuffer reorderBuffer;
     private final DataBus commonDataBus;
 
-    private Thread threadToExecuteInstructions;
-    private int numberOfFinishedInstructions;
+    private int numberOfScheduledInstructions;
+    private CountDownLatch countDownLatch;
 
     public Architecture(Config config) {
-        numberOfFinishedInstructions = 0;
         commonDataBus = new CommonDataBus();
 
         fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
@@ -51,10 +52,9 @@ public class Architecture implements BusObserver {
     }
 
     private void addObserversToCommonDataBus() {
+        Arrays.stream(addReservationStations).forEach(s -> commonDataBus.addObserver(s));
         commonDataBus.addObserver(registrarBank);
         commonDataBus.addObserver(reorderBuffer);
-        Arrays.stream(addReservationStations).forEach(s -> commonDataBus.addObserver(s));
-        commonDataBus.addObserver(this);
     }
 
     private void initAddersAndRelatedStations() {
@@ -73,33 +73,21 @@ public class Architecture implements BusObserver {
     public void schedule(RTypeInstruction instruction) {
         Objects.requireNonNull(instruction);
         instructionQueue.enqueue(instruction);
-        numberOfFinishedInstructions--;
-    }
-
-    @Override
-    public void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction) {
-        numberOfFinishedInstructions++;
-
-        if (numberOfFinishedInstructions == 0) {
-            threadToExecuteInstructions.notify();
-        }
+        numberOfScheduledInstructions++;
     }
 
     public void startExecution() {
-        threadToExecuteInstructions = new Thread(() -> {
-            for (var instruction : instructionQueue) {
-                System.out.println("\nLOG from architecture:");
-                System.out.println("\tExecuting << " + instruction + " >>\n");
+        countDownLatch = new CountDownLatch(numberOfScheduledInstructions);
 
-                fetchInstructionOperandValues(instruction);
-                storeInAFreeStation(instruction);
-            }
-        });
+        for (var instruction : instructionQueue) {
+            System.out.println("LOG from architecture:\n\tExecuting << " + instruction + " >>");
 
-        threadToExecuteInstructions.start();
+            fetchInstructionOperandValues(instruction);
+            storeInAFreeStation(instruction);
+        }
 
         try {
-            Thread.sleep(1000);
+            countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -114,7 +102,7 @@ public class Architecture implements BusObserver {
         secondOperand.setValue(secondOperandValue.get());
     }
 
-    public Optional<ReservationStation> getNotBusyStationForOperation(Operation operation) {
+    public Optional<Station> getNotBusyStationForOperation(Operation operation) {
         var stationsToLookIn = addReservationStations;
 
         if (operation.isMulOrDiv()) {
@@ -141,6 +129,6 @@ public class Architecture implements BusObserver {
         var secondOperandNewName = reorderBuffer.getNewNameForRegister(secondOperandName);
 
         reorderBuffer.setNewNameForRegister(instruction.getDestination().getName(), station.getName());
-        station.storeInstruction(instruction, firstOperandNewName, secondOperandNewName);
+        station.storeInstructionAndTryDispatch(instruction, firstOperandNewName, secondOperandNewName, countDownLatch);
     }
 }
