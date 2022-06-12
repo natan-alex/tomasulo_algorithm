@@ -3,7 +3,6 @@ package main.java.main;
 import main.java.config.ConfigParser;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
-import main.java.components.Architecture;
 import main.java.components.registers.FPRegister;
 
 public class Main {

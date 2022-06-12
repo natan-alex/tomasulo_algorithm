@@ -1,4 +1,4 @@
-package main.java.components;
+package main.java.main;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import main.java.config.Config;
+import main.java.components.InstructionQueue;
 import main.java.components.busses.CommonDataBus;
 import main.java.components.busses.DataBus;
 import main.java.components.registers.BaseRegisterBank;
