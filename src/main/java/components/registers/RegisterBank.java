@@ -5,15 +5,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
-import main.java.components.busses.BusObserver;
 import main.java.instructions.RTypeInstruction;
 
-public class RegistrarBank implements BusObserver {
+public class RegisterBank implements BaseRegisterBank<Double> {
     public static final String REGISTER_NAME_PREFIX = "F";
 
-    private final FPRegister[] registers;
+    private final Register<Double>[] registers;
 
-    public RegistrarBank(int numberOfRegisters) {
+    public RegisterBank(int numberOfRegisters) {
         if (numberOfRegisters <= 0) {
             throw new IllegalArgumentException("The number of registers must be positive and greather than 0");
         }
@@ -29,12 +28,14 @@ public class RegistrarBank implements BusObserver {
 
         for (int i = 0; i < registers.length; i++) {
             registers[i] = new FPRegister(REGISTER_NAME_PREFIX + i);
+
             System.out.print(registers[i].getName() + "  ");
         }
 
         System.out.println();
     }
 
+    @Override
     public void setRandomValuesInRegisters() {
         System.out.println("LOG from registrar bank:");
         System.out.println("\tSetting values for registers:");
@@ -47,19 +48,21 @@ public class RegistrarBank implements BusObserver {
         }
     }
 
-    public String[] getRegistrarNames() {
-        return Arrays.stream(registers)
-                .map(r -> r.getName())
-                .toArray(String[]::new);
+    @Override
+    public Register<Double>[] getAllRegisters() {
+        return registers;
     }
 
-    private Optional<FPRegister> getRegisterWithName(String name) {
+    private Optional<Register<Double>> getRegisterWithName(String name) {
         return Arrays.stream(registers)
                 .filter(e -> e.getName().equalsIgnoreCase(name))
                 .findFirst();
     }
 
-    public void setValueForRegister(String registerName, double value) {
+    @Override
+    public void setValueForRegister(String registerName, Double value) {
+        Objects.requireNonNull(value);
+
         var optional = getRegisterWithName(registerName);
 
         var register = optional.orElseThrow();
@@ -67,6 +70,7 @@ public class RegistrarBank implements BusObserver {
         register.setValue(value);
     }
 
+    @Override
     public Optional<Double> getRegisterValue(String registerName) {
         var optional = getRegisterWithName(registerName);
 
@@ -76,7 +80,7 @@ public class RegistrarBank implements BusObserver {
     }
 
     @Override
-    public void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction) {
+    public void handleFinishedInstruction(RTypeInstruction instruction) {
         Objects.requireNonNull(instruction);
 
         var destinationRegister = instruction.getDestination();
