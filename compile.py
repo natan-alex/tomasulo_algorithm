@@ -17,7 +17,8 @@ def main():
         os.mkdir(resources_path)
 
     shutil.copyfile(current_config_path, destination_path)
-    os.system(f'cd {output_dir} && java main.java.main.Main')
+    os.chdir(output_dir)
+    os.system('java main.java.main.Main')
 
 
 if __name__ == '__main__':
