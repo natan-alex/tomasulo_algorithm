@@ -21,7 +21,7 @@ public abstract class DataBus {
         Objects.requireNonNull(instruction);
 
         for (var observer : observers) {
-            observer.reactToBroadcastedFinishedInstruction(instruction);
+            observer.handleFinishedInstruction(instruction);
         }
     }
 }

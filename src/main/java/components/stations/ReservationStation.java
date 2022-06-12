@@ -86,7 +86,7 @@ public class ReservationStation implements Station {
     }
 
     @Override
-    public void reactToBroadcastedFinishedInstruction(RTypeInstruction instruction) {
+    public void handleFinishedInstruction(RTypeInstruction instruction) {
         Objects.requireNonNull(instruction);
 
         var destinationRegister = instruction.getDestination();
