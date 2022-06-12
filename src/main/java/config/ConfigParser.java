@@ -13,7 +13,6 @@ import org.json.simple.parser.ParseException;
 public class ConfigParser {
     private static final String CONFIG_FILE_PATH = Path.of("main", "resources", "config.json").toString();
 
-    private static final String INSTRUCTION_QUEUE_LENGTH_JSON_KEY = "instructionQueueLength";
     private static final String NUMBER_OF_FLOATING_POINT_REGISTERS_JSON_KEY = "numberOfFloatingPointRegisters";
 
     private static final String BUFFERS_SECTION_JSON_KEY = "buffers";
@@ -41,7 +40,6 @@ public class ConfigParser {
     }
 
     private static Config createConfigFromJsonObject(JSONObject obj) throws Exception {
-        var instructionQueueLength = getValueFromJsonObjectOrThrow(obj, INSTRUCTION_QUEUE_LENGTH_JSON_KEY, Long.class);
         var numberOfFloatingPointRegisters = getValueFromJsonObjectOrThrow(obj, NUMBER_OF_FLOATING_POINT_REGISTERS_JSON_KEY, Long.class);
         var buffersSection = getValueFromJsonObjectOrThrow(obj, BUFFERS_SECTION_JSON_KEY, JSONObject.class);
         var numberOfLoadBuffers = getValueFromJsonObjectOrThrow(buffersSection, NUMBER_OF_LOAD_BUFFERS_JSON_KEY, Long.class);
@@ -51,7 +49,6 @@ public class ConfigParser {
         var numberOfAddStations = getValueFromJsonObjectOrThrow(stationsSection, NUMBER_OF_ADD_STATIONS_JSON_KEY, Long.class);
 
         return new Config(
-            instructionQueueLength.intValue(),
             numberOfFloatingPointRegisters.intValue(),
             numberOfLoadBuffers.intValue(), numberOfStoreBuffers.intValue(),
             numberOfAddStations.intValue(), numberOfMulStations.intValue());

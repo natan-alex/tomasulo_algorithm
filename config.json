@@ -1,6 +1,5 @@
 {
-    "instructionQueueLength": 3,
-    "numberOfFloatingPointRegisters": 5,
+    "numberOfFloatingPointRegisters": 7,
     "buffers": {
         "numberOfLoadBuffers": 3,
         "numberOfStoreBuffers": 3

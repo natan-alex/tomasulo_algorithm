@@ -1,7 +1,6 @@
 package main.java.config;
 
 public class Config {
-    public final int instructionQueueLength;
     public final int numberOfFloatingPointRegisters;
     public final int numberOfLoadBuffers;
     public final int numberOfStoreBuffers;
@@ -9,14 +8,12 @@ public class Config {
     public final int numberOfMulStations;
 
     public Config(
-        int instructionQueueLength, 
         int numberOfFloatingPointRegisters,
         int numberOfLoadBuffers,
         int numberOfStoreBuffers,
         int numberOfAddStations,
         int numberOfMulStations
     ) {
-        this.instructionQueueLength = requirePositiveNumber(instructionQueueLength, "instructionQueueLength");
         this.numberOfFloatingPointRegisters = requirePositiveNumber(numberOfFloatingPointRegisters, "numberOfFloatingPointRegisters");
         this.numberOfStoreBuffers = requirePositiveNumber(numberOfStoreBuffers, "numberOfStoreBuffers");
         this.numberOfLoadBuffers = requirePositiveNumber(numberOfLoadBuffers, "numberOfLoadBuffers");
