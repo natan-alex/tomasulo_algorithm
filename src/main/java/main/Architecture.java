@@ -9,15 +9,18 @@ import main.java.config.Config;
 import main.java.components.InstructionQueue;
 import main.java.components.busses.CommonDataBus;
 import main.java.components.busses.DataBus;
+import main.java.components.registers.AddressRegisterBank;
 import main.java.components.registers.BaseRegisterBank;
+import main.java.components.registers.BaseRegisterBankObserver;
 import main.java.components.registers.BaseReorderBuffer;
-import main.java.components.registers.Register;
-import main.java.components.registers.RegisterBank;
+import main.java.components.registers.FPRegisterBank;
 import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.ReservationStation;
 import main.java.components.stations.Station;
 import main.java.components.stations.StationStorableInfos;
 import main.java.components.units.AddFunctionalUnit;
+import main.java.components.units.AddressUnit;
+import main.java.components.units.BaseAddressUnit;
 import main.java.components.units.FunctionalUnit;
 import main.java.components.units.MulFunctionalUnit;
 import main.java.instructions.Operation;
@@ -29,8 +32,10 @@ public class Architecture {
     private final FunctionalUnit[] fpAdders;
     private final FunctionalUnit[] fpMultipliers;
     private final InstructionQueue instructionQueue;
-    private final BaseRegisterBank<Double> registerBank;
+    private final BaseRegisterBankObserver<Double> fpRegisterBank;
+    private final BaseRegisterBank<Integer> addressRegisterBank;
     private final BaseReorderBuffer reorderBuffer;
+    private final BaseAddressUnit addressUnit;
     private final DataBus commonDataBus;
 
     private CountDownLatch countDownLatch;
@@ -40,10 +45,15 @@ public class Architecture {
 
         commonDataBus = new CommonDataBus();
 
-        registerBank = new RegisterBank(config.numberOfFloatingPointRegisters);
-        registerBank.setRandomValuesInRegisters();
+        fpRegisterBank = new FPRegisterBank(config.numberOfFloatingPointRegisters);
+        fpRegisterBank.setRandomValuesInRegisters();
 
-        reorderBuffer = new ReorderBuffer(registerBank);
+        addressRegisterBank = new AddressRegisterBank(5);
+        addressRegisterBank.setRandomValuesInRegisters();
+
+        reorderBuffer = new ReorderBuffer(fpRegisterBank);
+
+        addressUnit = new AddressUnit(addressRegisterBank);
 
         fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
         addReservationStations = new ReservationStation[config.numberOfAddStations];
@@ -83,12 +93,12 @@ public class Architecture {
     private void addObserversToCommonDataBus() {
         Arrays.stream(addReservationStations).forEach(commonDataBus::addObserver);
         Arrays.stream(mulReservationStations).forEach(commonDataBus::addObserver);
-        commonDataBus.addObserver(registerBank);
+        commonDataBus.addObserver(fpRegisterBank);
         commonDataBus.addObserver(reorderBuffer);
     }
 
     public String[] getRegisterNames() {
-        return registerBank.getRegisterNames();
+        return fpRegisterBank.getRegisterNames();
     }
 
     public void schedule(RTypeInstruction instruction) {
@@ -116,8 +126,8 @@ public class Architecture {
     private void fetchInstructionOperandValues(RTypeInstruction instruction) {
         var firstOperand = instruction.getFirstOperand();
         var secondOperand = instruction.getSecondOperand();
-        var firstOperandValue = registerBank.getRegisterValue(firstOperand.getName());
-        var secondOperandValue = registerBank.getRegisterValue(secondOperand.getName());
+        var firstOperandValue = fpRegisterBank.getRegisterValue(firstOperand.getName());
+        var secondOperandValue = fpRegisterBank.getRegisterValue(secondOperand.getName());
 
         firstOperand.setValue(firstOperandValue.get());
         secondOperand.setValue(secondOperandValue.get());
