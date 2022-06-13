@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
+import main.java.components.stations.StationStorableInfos;
 import main.java.instructions.RTypeInstruction;
 
 public class RegisterBank implements BaseRegisterBank<Double> {
@@ -49,8 +50,10 @@ public class RegisterBank implements BaseRegisterBank<Double> {
     }
 
     @Override
-    public Register<Double>[] getAllRegisters() {
-        return registers;
+    public String[] getRegisterNames() {
+        return Arrays.stream(registers)
+            .map(r -> r.getName())
+            .toArray(String[]::new);
     }
 
     private Optional<Register<Double>> getRegisterWithName(String name) {
@@ -80,19 +83,16 @@ public class RegisterBank implements BaseRegisterBank<Double> {
     }
 
     @Override
-    public void handleFinishedInstruction(RTypeInstruction instruction) {
-        Objects.requireNonNull(instruction);
+    public void handleCalculatedResult(StationStorableInfos infos, double calculatedResult) {
+        Objects.requireNonNull(infos);
 
-        var destinationRegister = instruction.getDestination();
-        var destinationRegisterValue = destinationRegister.getValue().orElseThrow();
-
-        var optional = getRegisterWithName(destinationRegister.getName());
+        var optional = getRegisterWithName(infos.getDestinationRegisterName());
 
         if (optional.isPresent()) {
             var register = optional.get();
-            register.setValue(destinationRegisterValue);
+            register.setValue(calculatedResult);
 
-            System.out.println("LOG from registrar bank:\n\tUsing broadcasted value << " + destinationRegisterValue + " >> to set value for << " + register.getName() + " >>");
+            System.out.println("LOG from registrar bank:\n\tUsing broadcasted value << " + calculatedResult + " >> to set value for << " + register.getName() + " >>");
         }
     }
 }

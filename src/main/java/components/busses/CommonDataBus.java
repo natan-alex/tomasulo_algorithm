@@ -2,20 +2,15 @@ package main.java.components.busses;
 
 import java.util.Objects;
 
-import main.java.instructions.RTypeInstruction;
+import main.java.components.stations.StationStorableInfos;
 
 public class CommonDataBus extends DataBus {
-    public CommonDataBus() {
-    }
+    @Override
+    public synchronized void notifyObserversWith(StationStorableInfos infos, double calculatedResult) {
+        Objects.requireNonNull(infos);
 
-    public synchronized void broadcastFinishedInstruction(RTypeInstruction instruction) {
-        Objects.requireNonNull(instruction);
+        System.out.println("LOG from common data bus:\n\tBroadcasting calculated value << " + calculatedResult + " >>");
 
-        var destinationRegister = instruction.getDestination();
-        var destinationRegisterValue = destinationRegister.getValue().orElseThrow();
-
-        System.out.println("LOG from common data bus:\n\tBroadcasting instruction << " + instruction + " >> with calculated value << " + destinationRegisterValue + " >>");
-
-        super.notifyObserversWith(instruction);
+        super.notifyObserversWith(infos, calculatedResult);
     }
 }

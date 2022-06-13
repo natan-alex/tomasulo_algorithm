@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import main.java.instructions.RTypeInstruction;
+import main.java.components.stations.StationStorableInfos;
 
 public abstract class DataBus {
     private final List<BusObserver> observers;
@@ -17,11 +17,11 @@ public abstract class DataBus {
         observers.add(Objects.requireNonNull(observer));
     }
 
-    public void notifyObserversWith(RTypeInstruction instruction) {
-        Objects.requireNonNull(instruction);
+    public void notifyObserversWith(StationStorableInfos infos, double calculatedResult) {
+        Objects.requireNonNull(infos);
 
         for (var observer : observers) {
-            observer.handleFinishedInstruction(instruction);
+            observer.handleCalculatedResult(infos, calculatedResult);
         }
     }
 }

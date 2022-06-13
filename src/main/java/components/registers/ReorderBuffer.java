@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
-import main.java.instructions.RTypeInstruction;
+import main.java.components.stations.StationStorableInfos;
 
 public class ReorderBuffer implements BaseReorderBuffer {
     private final Map<String, Optional<String>> originalAndCurrentNamesOfRegisters;
@@ -14,15 +14,15 @@ public class ReorderBuffer implements BaseReorderBuffer {
     public ReorderBuffer(BaseRegisterBank<?> registerBank) {
         Objects.requireNonNull(registerBank);
 
-        var registers = registerBank.getAllRegisters();
+        var registers = registerBank.getRegisterNames();
         this.originalAndCurrentNamesOfRegisters = new HashMap<>(registers.length);
         initRegisterNamesWith(registers);
     }
 
-    private void initRegisterNamesWith(Register<?>[] registers) {
-        for (int i = 0; i < registers.length; i++) {
+    private void initRegisterNamesWith(String[] registerNames) {
+        for (int i = 0; i < registerNames.length; i++) {
             originalAndCurrentNamesOfRegisters.put(
-                registers[i].getName(),
+                registerNames[i],
                 Optional.empty());
         }
     }
@@ -54,12 +54,10 @@ public class ReorderBuffer implements BaseReorderBuffer {
     }
 
     @Override
-    public void handleFinishedInstruction(RTypeInstruction instruction) {
-        Objects.requireNonNull(instruction);
+    public void handleCalculatedResult(StationStorableInfos infos, double calculatedResult) {
+        Objects.requireNonNull(infos);
 
-        var destinationRegister = instruction.getDestination();
-        var destinationRegisterName = destinationRegister.getName();
-
+        var destinationRegisterName = infos.getDestinationRegisterName();
         var optional = originalAndCurrentNamesOfRegisters.get(destinationRegisterName);
 
         if (optional.isPresent()) {
@@ -67,5 +65,6 @@ public class ReorderBuffer implements BaseReorderBuffer {
 
             originalAndCurrentNamesOfRegisters.put(destinationRegisterName, Optional.empty());
         }
+
     }
 }

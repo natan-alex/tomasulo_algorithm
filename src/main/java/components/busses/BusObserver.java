@@ -1,7 +1,7 @@
 package main.java.components.busses;
 
-import main.java.instructions.RTypeInstruction;
+import main.java.components.stations.StationStorableInfos;
 
 public interface BusObserver {
-    void handleFinishedInstruction(RTypeInstruction instruction);
+    void handleCalculatedResult(StationStorableInfos infos, double calculatedResult);
 }

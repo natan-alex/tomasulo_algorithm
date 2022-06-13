@@ -11,5 +11,5 @@ public interface BaseRegisterBank<T extends Number> extends BusObserver {
 
     void setRandomValuesInRegisters();
 
-    Register<T>[] getAllRegisters();
+    String[] getRegisterNames();
 }
