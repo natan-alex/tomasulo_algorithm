@@ -15,6 +15,10 @@ public class RTypeInstruction {
             FPRegister destination,
             FPRegister firstOperand,
             FPRegister secondOperand) {
+        if (operation == null || operation.isLoadOrStore()) {
+            throw new IllegalArgumentException("Invalid operation for R type instruction");
+        }
+
         this.operation = operation;
         this.destination = Objects.requireNonNull(destination);
         this.firstOperand = Objects.requireNonNull(firstOperand);
@@ -39,14 +43,8 @@ public class RTypeInstruction {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append(operation.getRepresentation())
-                .append(" ")
-                .append(destination.getName())
-                .append(" ")
-                .append(firstOperand.getName())
-                .append(" ")
-                .append(secondOperand.getName())
-                .toString();
+        return "RTypeInstruction [destination=" + destination + ", firstOperand=" + firstOperand + ", operation="
+                + operation + ", secondOperand=" + secondOperand + "]";
     }
+
 }
