@@ -6,14 +6,13 @@ import java.util.Optional;
 import java.util.Random;
 
 import main.java.components.stations.StationStorableInfos;
-import main.java.instructions.RTypeInstruction;
 
-public class RegisterBank implements BaseRegisterBank<Double> {
+public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     public static final String REGISTER_NAME_PREFIX = "F";
 
     private final Register<Double>[] registers;
 
-    public RegisterBank(int numberOfRegisters) {
+    public FPRegisterBank(int numberOfRegisters) {
         if (numberOfRegisters <= 0) {
             throw new IllegalArgumentException("The number of registers must be positive and greather than 0");
         }
@@ -24,7 +23,7 @@ public class RegisterBank implements BaseRegisterBank<Double> {
     }
 
     private void initRegisters() {
-        System.out.println("LOG from registrar bank:");
+        System.out.println("LOG from fp register bank:");
         System.out.print("\tAll registers: ");
 
         for (int i = 0; i < registers.length; i++) {
@@ -38,7 +37,7 @@ public class RegisterBank implements BaseRegisterBank<Double> {
 
     @Override
     public void setRandomValuesInRegisters() {
-        System.out.println("LOG from registrar bank:");
+        System.out.println("LOG from fp register bank:");
         System.out.println("\tSetting values for registers:");
 
         var random = new Random();
@@ -92,7 +91,7 @@ public class RegisterBank implements BaseRegisterBank<Double> {
             var register = optional.get();
             register.setValue(calculatedResult);
 
-            System.out.println("LOG from registrar bank:\n\tUsing broadcasted value << " + calculatedResult + " >> to set value for << " + register.getName() + " >>");
+            System.out.println("LOG from fp register bank:\n\tUsing broadcasted value << " + calculatedResult + " >> to set value for << " + register.getName() + " >>");
         }
     }
 }
