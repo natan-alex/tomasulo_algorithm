@@ -1,6 +1,5 @@
 package main.java.main;
 
-import main.java.config.Config;
 import main.java.config.ConfigParser;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
@@ -8,8 +7,7 @@ import main.java.components.registers.FPRegister;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        // var config = ConfigParser.parse();
-        var config = new Config(7, 2, 2, 3, 2);
+        var config = ConfigParser.parse();
         var architecture = new Architecture(config);
         var registers = architecture.getRegisterNames();
 
