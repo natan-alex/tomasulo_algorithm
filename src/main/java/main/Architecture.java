@@ -16,6 +16,7 @@ import main.java.components.registers.RegisterBank;
 import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.ReservationStation;
 import main.java.components.stations.Station;
+import main.java.components.stations.StationStorableInfos;
 import main.java.components.units.AddFunctionalUnit;
 import main.java.components.units.FunctionalUnit;
 import main.java.components.units.MulFunctionalUnit;
@@ -63,7 +64,6 @@ public class Architecture {
 
             addReservationStations[i] = new ReservationStation(
                     Operation.ADD.getRepresentation() + i,
-                    Operation.ADD,
                     fpAdders[i]);
         }
     }
@@ -76,7 +76,6 @@ public class Architecture {
 
             mulReservationStations[i] = new ReservationStation(
                     Operation.MUL.getRepresentation() + i,
-                    Operation.MUL,
                     fpMultipliers[i]);
         }
     }
@@ -88,8 +87,8 @@ public class Architecture {
         commonDataBus.addObserver(reorderBuffer);
     }
 
-    public Register<Double>[] getAllRegisters() {
-        return registerBank.getAllRegisters();
+    public String[] getRegisterNames() {
+        return registerBank.getRegisterNames();
     }
 
     public void schedule(RTypeInstruction instruction) {
@@ -119,6 +118,7 @@ public class Architecture {
         var secondOperand = instruction.getSecondOperand();
         var firstOperandValue = registerBank.getRegisterValue(firstOperand.getName());
         var secondOperandValue = registerBank.getRegisterValue(secondOperand.getName());
+
         firstOperand.setValue(firstOperandValue.get());
         secondOperand.setValue(secondOperandValue.get());
     }
@@ -132,13 +132,21 @@ public class Architecture {
         }
 
         var station = result.get();
-        var firstOperandName = instruction.getFirstOperand().getName();
-        var secondOperandName = instruction.getSecondOperand().getName();
-        var firstOperandNewName = reorderBuffer.getNewNameForRegister(firstOperandName);
-        var secondOperandNewName = reorderBuffer.getNewNameForRegister(secondOperandName);
+        var infos = new StationStorableInfos();
+
+        infos.setOriginStationName(station.getName());
+        infos.setOperation(instruction.getOperation());
+        infos.setDestinationRegisterName(instruction.getDestination().getName());
+        infos.setFirstOperandName(instruction.getFirstOperand().getName());
+        infos.setFirstOperandValue(instruction.getFirstOperand().getValue());
+        infos.setFirstOperandNewName(reorderBuffer.getNewNameForRegister(instruction.getFirstOperand().getName()));
+        infos.setSecondOperandName(instruction.getSecondOperand().getName());
+        infos.setSecondOperandValue(instruction.getSecondOperand().getValue());
+        infos.setSecondOperandNewName(reorderBuffer.getNewNameForRegister(instruction.getSecondOperand().getName()));
+        infos.setCountDownLatch(countDownLatch);
 
         reorderBuffer.renameRegister(instruction.getDestination().getName(), station.getName());
-        station.storeInstructionAndTryDispatch(instruction, firstOperandNewName, secondOperandNewName, countDownLatch);
+        station.storeInfosAndTryDispatch(infos);
     }
 
     private Optional<Station> getNotBusyStationForOperation(Operation operation) {

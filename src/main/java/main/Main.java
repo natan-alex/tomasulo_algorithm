@@ -1,5 +1,6 @@
 package main.java.main;
 
+import main.java.config.Config;
 import main.java.config.ConfigParser;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
@@ -7,17 +8,18 @@ import main.java.components.registers.FPRegister;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        var config = ConfigParser.parse();
+        // var config = ConfigParser.parse();
+        var config = new Config(7, 2, 2, 3, 2);
         var architecture = new Architecture(config);
-        var registers = architecture.getAllRegisters();
+        var registers = architecture.getRegisterNames();
 
-        var r0 = new FPRegister(registers[0].getName());
-        var r1 = new FPRegister(registers[1].getName());
-        var r2 = new FPRegister(registers[2].getName());
-        var r3 = new FPRegister(registers[3].getName());
-        var r4 = new FPRegister(registers[4].getName());
-        var r5 = new FPRegister(registers[5].getName());
-        var r6 = new FPRegister(registers[6].getName());
+        var r0 = new FPRegister(registers[0]);
+        var r1 = new FPRegister(registers[1]);
+        var r2 = new FPRegister(registers[2]);
+        var r3 = new FPRegister(registers[3]);
+        var r4 = new FPRegister(registers[4]);
+        var r5 = new FPRegister(registers[5]);
+        var r6 = new FPRegister(registers[6]);
 
         var i0 = new RTypeInstruction(
                 Operation.ADD,

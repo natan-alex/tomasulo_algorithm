@@ -3,8 +3,8 @@ package main.java.components.units;
 import java.util.Objects;
 
 import main.java.components.busses.DataBus;
+import main.java.components.stations.StationStorableInfos;
 import main.java.instructions.Operation;
-import main.java.instructions.RTypeInstruction;
 
 public class AddFunctionalUnit extends FunctionalUnit {
     public AddFunctionalUnit(
@@ -15,21 +15,20 @@ public class AddFunctionalUnit extends FunctionalUnit {
     }
 
     @Override
-    public void calculateResultFor(RTypeInstruction instruction) {
-        Objects.requireNonNull(instruction);
+    public double calculateResultFor(StationStorableInfos infos) {
+        Objects.requireNonNull(infos);
 
-        var operation = instruction.getOperation();
-        var destinationRegister = instruction.getDestination();
-        var firstOperandValue = instruction.getFirstOperand().getValue().orElseThrow();
-        var secondOperandValue = instruction.getSecondOperand().getValue().orElseThrow();
+        var operation = infos.getOperation();
+        var firstOperandValue = infos.getFirstOperandValue().orElseThrow();
+        var secondOperandValue = infos.getSecondOperandValue().orElseThrow();
 
         if (operation == Operation.ADD) {
-            destinationRegister.setValue(firstOperandValue + secondOperandValue);
+            return firstOperandValue + secondOperandValue;
         } else if (operation == Operation.SUB) {
-            destinationRegister.setValue(firstOperandValue - secondOperandValue);
-        } else {
-            var message = "Illegal operation " + operation.getRepresentation() + " for an ADD unit.";
-            throw new IllegalArgumentException(message);
+            return firstOperandValue - secondOperandValue;
         }
+
+        var message = "Illegal operation " + operation.getRepresentation() + " for an ADD unit.";
+        throw new IllegalArgumentException(message);
     }
 }

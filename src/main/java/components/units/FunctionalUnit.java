@@ -1,15 +1,16 @@
 package main.java.components.units;
 
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 
 import main.java.components.busses.DataBus;
-import main.java.instructions.RTypeInstruction;
+import main.java.components.stations.StationStorableInfos;
 
 public abstract class FunctionalUnit {
     private final String name;
     private final DataBus commonDataBus;
     private final int timeToCalculateResult;
+
+    private Thread thread;
 
     public FunctionalUnit(
         String unitName, 
@@ -25,24 +26,36 @@ public abstract class FunctionalUnit {
         this.commonDataBus = Objects.requireNonNull(commonDataBus);
     }
 
-    public abstract void calculateResultFor(RTypeInstruction instruction);
+    public abstract double calculateResultFor(StationStorableInfos infos);
 
-    public void execute(RTypeInstruction instruction, CountDownLatch countDownLatch) {
-        Objects.requireNonNull(instruction);
-        Objects.requireNonNull(countDownLatch);
+    private void waitIfAlive() {
+        if (thread != null && thread.isAlive()) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-        new Thread(() -> {
-            System.out.println("LOG from " + name + " unit:\n\tCalculating result for instruction << " + instruction + " >>");
+    public void execute(StationStorableInfos infos) {
+        Objects.requireNonNull(infos);
 
+        waitIfAlive();
+
+        thread = new Thread(() -> {
+            System.out.println("LOG from " + name + " unit:\n\tCalculating result for << " + infos.getOperation() + " " + infos.getFirstOperandName() + " " + infos.getSecondOperandName() + " >>");
+
+            var result = calculateResultFor(infos);
             trySleep(timeToCalculateResult);
-            calculateResultFor(instruction);
 
-            var result = instruction.getDestination().getValue().orElseThrow();
             System.out.println("LOG from " + name + " unit:\n\tSending result << " + result + " >> to common data bus");
 
-            commonDataBus.notifyObserversWith(instruction);
-            countDownLatch.countDown();
-        }).start();
+            infos.getCountDownLatch().countDown();
+            commonDataBus.notifyObserversWith(infos, result);
+        });
+
+        thread.start();
     }
 
     private static void trySleep(int millis) {
