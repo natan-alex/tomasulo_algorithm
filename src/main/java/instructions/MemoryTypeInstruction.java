@@ -41,6 +41,7 @@ public class MemoryTypeInstruction extends BaseInstruction {
     @Override
     public String toString() {
         return operation + " " +
+                destinationRegister.getName() + " " +
                 offset + " + " +
                 baseRegister.getName();
     }
