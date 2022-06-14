@@ -4,9 +4,14 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Stream;
 
 import main.java.config.Config;
 import main.java.components.InstructionQueue;
+import main.java.components.buffers.Buffer;
+import main.java.components.buffers.LoadBuffer;
+import main.java.components.buffers.ReorderBuffer;
+import main.java.components.buffers.StoreBuffer;
 import main.java.components.busses.BaseOperandBusses;
 import main.java.components.busses.BaseOperationsBus;
 import main.java.components.busses.CommonDataBus;
@@ -18,24 +23,29 @@ import main.java.components.registers.BaseRegisterBank;
 import main.java.components.registers.BaseRegisterBankObserver;
 import main.java.components.registers.BaseReorderBuffer;
 import main.java.components.registers.FPRegisterBank;
-import main.java.components.registers.ReorderBuffer;
 import main.java.components.stations.StationInstructionAndControlInfos;
 import main.java.components.stations.ReservationStation;
 import main.java.components.stations.Station;
 import main.java.components.units.AddFunctionalUnit;
 import main.java.components.units.AddressUnit;
 import main.java.components.units.BaseAddressUnit;
+import main.java.components.units.BaseMemoryUnit;
 import main.java.components.units.FunctionalUnit;
+import main.java.components.units.MemoryInstructionAndControlInfos;
+import main.java.components.units.MemoryUnit;
 import main.java.components.units.MulFunctionalUnit;
-import main.java.instructions.MemTypeInstruction;
+import main.java.instructions.MemoryTypeInstruction;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
 
 public class Architecture {
     private final Station<Double>[] addReservationStations;
     private final Station<Double>[] mulReservationStations;
+    private final Station<Double>[] allReservationStations;
     private final FunctionalUnit[] fpAdders;
     private final FunctionalUnit[] fpMultipliers;
+    private final Buffer[] loadBuffers;
+    private final Buffer[] storeBuffers;
     private final InstructionQueue instructionQueue;
     private final BaseRegisterBankObserver<Double> fpRegisterBank;
     private final BaseRegisterBank<Integer> addressRegisterBank;
@@ -44,6 +54,7 @@ public class Architecture {
     private final DataBus commonDataBus;
     private final BaseOperationsBus<Double> operationsBus;
     private final BaseOperandBusses<Double> operandBusses;
+    private final BaseMemoryUnit memoryUnit;
 
     private CountDownLatch countDownLatch;
 
@@ -60,18 +71,28 @@ public class Architecture {
 
         reorderBuffer = new ReorderBuffer(fpRegisterBank);
 
-        addressUnit = new AddressUnit(addressRegisterBank);
+        loadBuffers = new LoadBuffer[config.numberOfLoadBuffers];
+        storeBuffers = new StoreBuffer[config.numberOfStoreBuffers];
 
-        operationsBus = new OperationsBus();
-        operandBusses = new OperandBusses(fpRegisterBank, reorderBuffer);
+        var allBuffers = Stream.concat(Arrays.stream(loadBuffers), Arrays.stream(storeBuffers)).toArray(Buffer[]::new);
+
+        memoryUnit = new MemoryUnit(commonDataBus);
+        addressUnit = new AddressUnit(addressRegisterBank, fpRegisterBank, allBuffers, reorderBuffer);
 
         fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
         addReservationStations = new ReservationStation[config.numberOfAddStations];
-        initAddersAndRelatedStations();
 
         fpMultipliers = new MulFunctionalUnit[config.numberOfMulStations];
         mulReservationStations = new ReservationStation[config.numberOfMulStations];
+
+        allReservationStations = new ReservationStation[addReservationStations.length + mulReservationStations.length];
+
+        initBuffers();
+        initAddersAndRelatedStations();
         initMultipliersAndRelatedStations();
+
+        operationsBus = new OperationsBus(allReservationStations);
+        operandBusses = new OperandBusses(allReservationStations, fpRegisterBank, reorderBuffer);
 
         addObserversToCommonDataBus();
     }
@@ -85,6 +106,8 @@ public class Architecture {
             addReservationStations[i] = new ReservationStation(
                     Operation.ADD.getRepresentation() + i,
                     fpAdders[i]);
+
+            allReservationStations[i] = addReservationStations[i];
         }
     }
 
@@ -97,6 +120,18 @@ public class Architecture {
             mulReservationStations[i] = new ReservationStation(
                     Operation.MUL.getRepresentation() + i,
                     fpMultipliers[i]);
+
+            allReservationStations[i + addReservationStations.length] = mulReservationStations[i];
+        }
+    }
+
+    private void initBuffers() {
+        for (int i = 0; i < loadBuffers.length; i++) {
+            loadBuffers[i] = new LoadBuffer(Operation.LOAD.getRepresentation() + i, memoryUnit);
+        }
+
+        for (int i = 0; i < storeBuffers.length; i++) {
+            storeBuffers[i] = new StoreBuffer(Operation.STORE.getRepresentation() + i, memoryUnit);
         }
     }
 
@@ -105,6 +140,8 @@ public class Architecture {
         commonDataBus.addObserver(reorderBuffer);
         Arrays.stream(addReservationStations).forEach(commonDataBus::addObserver);
         Arrays.stream(mulReservationStations).forEach(commonDataBus::addObserver);
+        Arrays.stream(loadBuffers).forEach(commonDataBus::addObserver);
+        Arrays.stream(storeBuffers).forEach(commonDataBus::addObserver);
     }
 
     public String[] getRegisterNames() {
@@ -116,7 +153,7 @@ public class Architecture {
         instructionQueue.enqueue(instruction);
     }
 
-    public void schedule(MemTypeInstruction instruction) {
+    public void schedule(MemoryTypeInstruction instruction) {
         Objects.requireNonNull(instruction);
         instructionQueue.enqueue(instruction);
     }
@@ -126,7 +163,12 @@ public class Architecture {
 
         for (var instruction : instructionQueue) {
             System.out.println("LOG from architecture:\n\tExecuting << " + instruction + " >>");
-            destructureInstructionAndTryDispatch(instruction);
+
+            if (instruction instanceof RTypeInstruction) {
+                destructureRTypeInstructionAndTryDispatch((RTypeInstruction) instruction);
+            } else {
+                destructureMemTypeInstructionAndTryDispatch((MemoryTypeInstruction) instruction);
+            }
         }
 
         try {
@@ -136,35 +178,22 @@ public class Architecture {
         }
     }
 
-    private void destructureInstructionAndTryDispatch(RTypeInstruction instruction) {
-        var operation = instruction.getOperation();
-        var firstOperandName = instruction.getFirstOperand().getName();
-        var secondOperandName = instruction.getSecondOperand().getName();
+    private void destructureRTypeInstructionAndTryDispatch(RTypeInstruction instruction) {
+        var stationName = operationsBus.storeOperationInStationAndMarkItBusy(instruction.getOperation());
 
-        var station = getANotBusyStationForOperation(instruction.getOperation());
-
-        if (station.isEmpty()) {
-            System.out.println("All busy :(");
+        if (stationName.isEmpty()) {
+            System.out.println("All reservation stations busy :(");
             return;
         }
 
-        operationsBus.storeOperationInStationAndMarkItBusy(station.get(), operation);
-        operandBusses.fetchOperandValuesIntoStation(firstOperandName, secondOperandName, station.get());
-        reorderBuffer.renameRegister(instruction.getDestination().getName(), station.get().getName());
-
         var infos = new StationInstructionAndControlInfos(instruction, countDownLatch);
-        station.get().dispatchStoredInfosToUnitIfPossibleWith(infos);
+        reorderBuffer.renameRegister(instruction.getDestinationRegister().getName(), stationName.get());
+        operandBusses.storeInfosInStation(infos, stationName.get());
     }
 
-    private Optional<Station<Double>> getANotBusyStationForOperation(Operation operation) {
-        var stationsToLookIn = addReservationStations;
-
-        if (operation.isMulOrDiv()) {
-            stationsToLookIn = mulReservationStations;
-        }
-
-        return Arrays.stream(stationsToLookIn)
-                .filter(s -> !s.isBusy())
-                .findFirst();
+    private void destructureMemTypeInstructionAndTryDispatch(MemoryTypeInstruction instruction) {
+        var infos = new MemoryInstructionAndControlInfos(instruction, countDownLatch);
+        reorderBuffer.renameRegister(instruction.getDestinationRegister().getName(), memoryUnit.getName());
+        addressUnit.calculateAddressAndStoreInABuffer(infos);
     }
 }

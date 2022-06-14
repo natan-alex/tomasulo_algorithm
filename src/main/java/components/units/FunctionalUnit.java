@@ -42,13 +42,19 @@ public abstract class FunctionalUnit {
         waitIfAlive();
 
         thread = new Thread(() -> {
-            System.out.println("LOG from " + name + " unit:\n\tCalculating result for << " + infos.getOperation() + " "
-                    + infos.getFirstOperandName() + " " + infos.getSecondOperandName() + " >>");
+            var instruction = infos.getOperation() + " "
+                    + infos.getDestinationRegisterName() + " "
+                    + infos.getFirstOperandName() + " "
+                    + infos.getSecondOperandName();
+
+            System.out.println("LOG from " + name + " unit:"
+                    + "\n\tCalculating result for instruction << " + instruction + " >>");
 
             var result = calculateResultFor(infos);
             trySleep(timeToCalculateResult);
 
-            System.out.println("LOG from " + name + " unit:\n\tSending result << " + result + " >> to common data bus");
+            System.out.println("LOG from " + name + " unit:"
+                    + "\n\tSending result << " + result + " >> to common data bus");
 
             infos.getCountDownLatch().countDown();
             commonDataBus.notifyObserversWith(infos, result);

@@ -1,8 +1,10 @@
 package main.java.main;
 
 import main.java.config.ConfigParser;
+import main.java.instructions.MemoryTypeInstruction;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
+import main.java.components.registers.AddressRegister;
 import main.java.components.registers.FPRegister;
 
 public class Main {
@@ -18,6 +20,8 @@ public class Main {
         var r4 = new FPRegister(registers[4]);
         var r5 = new FPRegister(registers[5]);
         var r6 = new FPRegister(registers[6]);
+
+        var m0 = new AddressRegister("R0");
 
         var i0 = new RTypeInstruction(
                 Operation.ADD,
@@ -39,11 +43,16 @@ public class Main {
                 Operation.MUL,
                 r4, r5, r6);
 
+        var i5 = new MemoryTypeInstruction(
+                Operation.LOAD,
+                r3, 30, m0);
+
         architecture.schedule(i0);
         architecture.schedule(i1);
         architecture.schedule(i2);
         architecture.schedule(i3);
         architecture.schedule(i4);
+        architecture.schedule(i5);
 
         architecture.startExecution();
     }
