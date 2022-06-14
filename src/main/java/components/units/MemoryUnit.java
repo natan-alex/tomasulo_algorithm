@@ -7,7 +7,7 @@ import main.java.components.busses.DataBus;
 import main.java.instructions.Operation;
 
 public class MemoryUnit implements BaseMemoryUnit {
-    private static final String NAME = "Memory unit";
+    public static final String NAME = "Memory unit";
     private final DataBus commonDataBus;
     private final int timeToCalculateResult;
 
@@ -21,11 +21,6 @@ public class MemoryUnit implements BaseMemoryUnit {
 
         this.timeToCalculateResult = 3 * 1000;
         this.commonDataBus = Objects.requireNonNull(commonDataBus);
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
     private void waitIfAlive() {

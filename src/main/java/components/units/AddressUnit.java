@@ -2,13 +2,15 @@ package main.java.components.units;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import main.java.components.buffers.Buffer;
 import main.java.components.registers.BaseRegisterBank;
 import main.java.components.registers.BaseReorderBuffer;
+import main.java.instructions.Operation;
 
 public class AddressUnit implements BaseAddressUnit {
-    private static final String NAME = "Address unit";
+    public static final String NAME = "Address unit";
     private final BaseRegisterBank<Integer> addressRegisterBank;
     private final Buffer[] buffers;
     private final BaseReorderBuffer reorderBuffer;
@@ -23,10 +25,6 @@ public class AddressUnit implements BaseAddressUnit {
         this.buffers = Objects.requireNonNull(buffers);
         this.reorderBuffer = Objects.requireNonNull(reorderBuffer);
         this.fpRegisterBank = Objects.requireNonNull(fpRegisterBank);
-    }
-
-    public static String getName() {
-        return NAME;
     }
 
     @Override
@@ -46,14 +44,19 @@ public class AddressUnit implements BaseAddressUnit {
                 reorderBuffer.getNewNameForRegister(infos.getDestinationRegisterName()),
                 infos.getCountDownLatch());
 
-        var buffer = Arrays.stream(buffers)
-                .filter(b -> !b.isBusy() && b.getOperation() == infos.getOperation())
-                .findFirst();
+        var buffer = getNotBusyBufferForOperation(infos.getOperation());
 
         if (buffer.isPresent()) {
+            reorderBuffer.renameRegister(infos.getDestinationRegisterName(), MemoryUnit.NAME);
             buffer.get().storeInfosAndSendToMemoryUnit(allInfos);
         } else {
             System.out.println("All buffers are busy :(");
         }
+    }
+
+    private Optional<Buffer> getNotBusyBufferForOperation(Operation operation) {
+        return Arrays.stream(buffers)
+                .filter(b -> !b.isBusy() && b.getOperation() == operation)
+                .findFirst();
     }
 }
