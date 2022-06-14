@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
-import main.java.components.stations.StationStorableInfos;
+import main.java.components.units.FunctionaUnitBroadcastInfos;
 
 public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     public static final String REGISTER_NAME_PREFIX = "F";
@@ -51,8 +51,8 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     @Override
     public String[] getRegisterNames() {
         return Arrays.stream(registers)
-            .map(r -> r.getName())
-            .toArray(String[]::new);
+                .map(r -> r.getName())
+                .toArray(String[]::new);
     }
 
     private Optional<Register<Double>> getRegisterWithName(String name) {
@@ -82,7 +82,7 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     }
 
     @Override
-    public void handleCalculatedResult(StationStorableInfos infos, double calculatedResult) {
+    public void handleCalculatedResult(FunctionaUnitBroadcastInfos infos, double calculatedResult) {
         Objects.requireNonNull(infos);
 
         var optional = getRegisterWithName(infos.getDestinationRegisterName());
@@ -91,7 +91,8 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
             var register = optional.get();
             register.setValue(calculatedResult);
 
-            System.out.println("LOG from fp register bank:\n\tUsing broadcasted value << " + calculatedResult + " >> to set value for << " + register.getName() + " >>");
+            System.out.println("LOG from fp register bank:\n\tUsing broadcasted value << " + calculatedResult
+                    + " >> to set value for << " + register.getName() + " >>");
         }
     }
 }

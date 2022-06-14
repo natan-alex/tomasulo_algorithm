@@ -3,7 +3,6 @@ package main.java.components.units;
 import java.util.Objects;
 
 import main.java.components.busses.DataBus;
-import main.java.components.stations.StationStorableInfos;
 
 public abstract class FunctionalUnit {
     private final String name;
@@ -13,10 +12,9 @@ public abstract class FunctionalUnit {
     private Thread thread;
 
     public FunctionalUnit(
-        String unitName, 
-        int cyclesRequiredToPerformOperation, 
-        DataBus commonDataBus
-    ) {
+            String unitName,
+            int cyclesRequiredToPerformOperation,
+            DataBus commonDataBus) {
         if (cyclesRequiredToPerformOperation <= 0) {
             throw new IllegalArgumentException("Number of cycles must be greather than 0.");
         }
@@ -26,7 +24,7 @@ public abstract class FunctionalUnit {
         this.commonDataBus = Objects.requireNonNull(commonDataBus);
     }
 
-    public abstract double calculateResultFor(StationStorableInfos infos);
+    public abstract double calculateResultFor(FunctionaUnitBroadcastInfos infos);
 
     private void waitIfAlive() {
         if (thread != null && thread.isAlive()) {
@@ -38,13 +36,14 @@ public abstract class FunctionalUnit {
         }
     }
 
-    public void execute(StationStorableInfos infos) {
+    public void execute(FunctionaUnitBroadcastInfos infos) {
         Objects.requireNonNull(infos);
 
         waitIfAlive();
 
         thread = new Thread(() -> {
-            System.out.println("LOG from " + name + " unit:\n\tCalculating result for << " + infos.getOperation() + " " + infos.getFirstOperandName() + " " + infos.getSecondOperandName() + " >>");
+            System.out.println("LOG from " + name + " unit:\n\tCalculating result for << " + infos.getOperation() + " "
+                    + infos.getFirstOperandName() + " " + infos.getSecondOperandName() + " >>");
 
             var result = calculateResultFor(infos);
             trySleep(timeToCalculateResult);

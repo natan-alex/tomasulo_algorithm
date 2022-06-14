@@ -3,25 +3,22 @@ package main.java.components.units;
 import java.util.Objects;
 
 import main.java.components.busses.DataBus;
-import main.java.components.stations.StationStorableInfos;
 import main.java.instructions.Operation;
-import main.java.instructions.RTypeInstruction;
 
 public class MulFunctionalUnit extends FunctionalUnit {
     public MulFunctionalUnit(
-        String unitName, 
-        DataBus dataBus
-    ) {
+            String unitName,
+            DataBus dataBus) {
         super(unitName, 4, dataBus);
     }
 
     @Override
-    public double calculateResultFor(StationStorableInfos infos) {
+    public double calculateResultFor(FunctionaUnitBroadcastInfos infos) {
         Objects.requireNonNull(infos);
 
         var operation = infos.getOperation();
-        var firstOperandValue = infos.getFirstOperandValue().orElseThrow();
-        var secondOperandValue = infos.getSecondOperandValue().orElseThrow();
+        var firstOperandValue = infos.getFirstOperandValue();
+        var secondOperandValue = infos.getSecondOperandValue();
 
         if (operation == Operation.MUL) {
             return firstOperandValue * secondOperandValue;

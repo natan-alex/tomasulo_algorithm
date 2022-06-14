@@ -7,28 +7,33 @@ import java.util.concurrent.CountDownLatch;
 
 import main.java.config.Config;
 import main.java.components.InstructionQueue;
+import main.java.components.busses.BaseOperandBusses;
+import main.java.components.busses.BaseOperationsBus;
 import main.java.components.busses.CommonDataBus;
 import main.java.components.busses.DataBus;
+import main.java.components.busses.OperandBusses;
+import main.java.components.busses.OperationsBus;
 import main.java.components.registers.AddressRegisterBank;
 import main.java.components.registers.BaseRegisterBank;
 import main.java.components.registers.BaseRegisterBankObserver;
 import main.java.components.registers.BaseReorderBuffer;
 import main.java.components.registers.FPRegisterBank;
 import main.java.components.registers.ReorderBuffer;
+import main.java.components.stations.StationInstructionAndControlInfos;
 import main.java.components.stations.ReservationStation;
 import main.java.components.stations.Station;
-import main.java.components.stations.StationStorableInfos;
 import main.java.components.units.AddFunctionalUnit;
 import main.java.components.units.AddressUnit;
 import main.java.components.units.BaseAddressUnit;
 import main.java.components.units.FunctionalUnit;
 import main.java.components.units.MulFunctionalUnit;
+import main.java.instructions.MemTypeInstruction;
 import main.java.instructions.Operation;
 import main.java.instructions.RTypeInstruction;
 
 public class Architecture {
-    private final Station[] addReservationStations;
-    private final Station[] mulReservationStations;
+    private final Station<Double>[] addReservationStations;
+    private final Station<Double>[] mulReservationStations;
     private final FunctionalUnit[] fpAdders;
     private final FunctionalUnit[] fpMultipliers;
     private final InstructionQueue instructionQueue;
@@ -37,6 +42,8 @@ public class Architecture {
     private final BaseReorderBuffer reorderBuffer;
     private final BaseAddressUnit addressUnit;
     private final DataBus commonDataBus;
+    private final BaseOperationsBus<Double> operationsBus;
+    private final BaseOperandBusses<Double> operandBusses;
 
     private CountDownLatch countDownLatch;
 
@@ -54,6 +61,9 @@ public class Architecture {
         reorderBuffer = new ReorderBuffer(fpRegisterBank);
 
         addressUnit = new AddressUnit(addressRegisterBank);
+
+        operationsBus = new OperationsBus();
+        operandBusses = new OperandBusses(fpRegisterBank, reorderBuffer);
 
         fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
         addReservationStations = new ReservationStation[config.numberOfAddStations];
@@ -91,10 +101,10 @@ public class Architecture {
     }
 
     private void addObserversToCommonDataBus() {
-        Arrays.stream(addReservationStations).forEach(commonDataBus::addObserver);
-        Arrays.stream(mulReservationStations).forEach(commonDataBus::addObserver);
         commonDataBus.addObserver(fpRegisterBank);
         commonDataBus.addObserver(reorderBuffer);
+        Arrays.stream(addReservationStations).forEach(commonDataBus::addObserver);
+        Arrays.stream(mulReservationStations).forEach(commonDataBus::addObserver);
     }
 
     public String[] getRegisterNames() {
@@ -106,14 +116,17 @@ public class Architecture {
         instructionQueue.enqueue(instruction);
     }
 
+    public void schedule(MemTypeInstruction instruction) {
+        Objects.requireNonNull(instruction);
+        instructionQueue.enqueue(instruction);
+    }
+
     public void startExecution() {
         countDownLatch = new CountDownLatch(instructionQueue.size());
 
         for (var instruction : instructionQueue) {
             System.out.println("LOG from architecture:\n\tExecuting << " + instruction + " >>");
-
-            fetchInstructionOperandValues(instruction);
-            storeInAFreeStation(instruction);
+            destructureInstructionAndTryDispatch(instruction);
         }
 
         try {
@@ -123,43 +136,27 @@ public class Architecture {
         }
     }
 
-    private void fetchInstructionOperandValues(RTypeInstruction instruction) {
-        var firstOperand = instruction.getFirstOperand();
-        var secondOperand = instruction.getSecondOperand();
-        var firstOperandValue = fpRegisterBank.getRegisterValue(firstOperand.getName());
-        var secondOperandValue = fpRegisterBank.getRegisterValue(secondOperand.getName());
+    private void destructureInstructionAndTryDispatch(RTypeInstruction instruction) {
+        var operation = instruction.getOperation();
+        var firstOperandName = instruction.getFirstOperand().getName();
+        var secondOperandName = instruction.getSecondOperand().getName();
 
-        firstOperand.setValue(firstOperandValue.get());
-        secondOperand.setValue(secondOperandValue.get());
-    }
+        var station = getANotBusyStationForOperation(instruction.getOperation());
 
-    private void storeInAFreeStation(RTypeInstruction instruction) {
-        var result = getNotBusyStationForOperation(instruction.getOperation());
-
-        if (result.isEmpty()) {
-            System.out.println("All busy");
+        if (station.isEmpty()) {
+            System.out.println("All busy :(");
             return;
         }
 
-        var station = result.get();
-        var infos = new StationStorableInfos();
+        operationsBus.storeOperationInStationAndMarkItBusy(station.get(), operation);
+        operandBusses.fetchOperandValuesIntoStation(firstOperandName, secondOperandName, station.get());
+        reorderBuffer.renameRegister(instruction.getDestination().getName(), station.get().getName());
 
-        infos.setOriginStationName(station.getName());
-        infos.setOperation(instruction.getOperation());
-        infos.setDestinationRegisterName(instruction.getDestination().getName());
-        infos.setFirstOperandName(instruction.getFirstOperand().getName());
-        infos.setFirstOperandValue(instruction.getFirstOperand().getValue());
-        infos.setFirstOperandNewName(reorderBuffer.getNewNameForRegister(instruction.getFirstOperand().getName()));
-        infos.setSecondOperandName(instruction.getSecondOperand().getName());
-        infos.setSecondOperandValue(instruction.getSecondOperand().getValue());
-        infos.setSecondOperandNewName(reorderBuffer.getNewNameForRegister(instruction.getSecondOperand().getName()));
-        infos.setCountDownLatch(countDownLatch);
-
-        reorderBuffer.renameRegister(instruction.getDestination().getName(), station.getName());
-        station.storeInfosAndTryDispatch(infos);
+        var infos = new StationInstructionAndControlInfos(instruction, countDownLatch);
+        station.get().dispatchStoredInfosToUnitIfPossibleWith(infos);
     }
 
-    private Optional<Station> getNotBusyStationForOperation(Operation operation) {
+    private Optional<Station<Double>> getANotBusyStationForOperation(Operation operation) {
         var stationsToLookIn = addReservationStations;
 
         if (operation.isMulOrDiv()) {

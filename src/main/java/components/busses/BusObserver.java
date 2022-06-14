@@ -1,7 +1,7 @@
 package main.java.components.busses;
 
-import main.java.components.stations.StationStorableInfos;
+import main.java.components.units.FunctionaUnitBroadcastInfos;
 
 public interface BusObserver {
-    void handleCalculatedResult(StationStorableInfos infos, double calculatedResult);
+    void handleCalculatedResult(FunctionaUnitBroadcastInfos infos, double calculatedResult);
 }

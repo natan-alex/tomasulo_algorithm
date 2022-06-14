@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
-import main.java.components.stations.StationStorableInfos;
+import main.java.components.units.FunctionaUnitBroadcastInfos;
 
 public class ReorderBuffer implements BaseReorderBuffer {
     private final Map<String, Optional<String>> originalAndCurrentNamesOfRegisters;
@@ -22,8 +22,8 @@ public class ReorderBuffer implements BaseReorderBuffer {
     private void initRegisterNamesWith(String[] registerNames) {
         for (int i = 0; i < registerNames.length; i++) {
             originalAndCurrentNamesOfRegisters.put(
-                registerNames[i],
-                Optional.empty());
+                    registerNames[i],
+                    Optional.empty());
         }
     }
 
@@ -54,14 +54,15 @@ public class ReorderBuffer implements BaseReorderBuffer {
     }
 
     @Override
-    public void handleCalculatedResult(StationStorableInfos infos, double calculatedResult) {
+    public void handleCalculatedResult(FunctionaUnitBroadcastInfos infos, double calculatedResult) {
         Objects.requireNonNull(infos);
 
         var destinationRegisterName = infos.getDestinationRegisterName();
         var optional = originalAndCurrentNamesOfRegisters.get(destinationRegisterName);
 
         if (optional.isPresent()) {
-            System.out.println("LOG from reorder buffer:\n\tMarking << " + destinationRegisterName + " >> as if it was not renamed");
+            System.out.println("LOG from reorder buffer:\n\tMarking << " + destinationRegisterName
+                    + " >> as if it was not renamed");
 
             originalAndCurrentNamesOfRegisters.put(destinationRegisterName, Optional.empty());
         }
