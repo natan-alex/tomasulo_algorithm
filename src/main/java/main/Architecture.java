@@ -2,7 +2,6 @@ package main.java.main;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
@@ -46,6 +45,7 @@ public class Architecture {
     private final FunctionalUnit[] fpMultipliers;
     private final Buffer[] loadBuffers;
     private final Buffer[] storeBuffers;
+    private final Buffer[] allBuffers;
     private final InstructionQueue instructionQueue;
     private final BaseRegisterBankObserver<Double> fpRegisterBank;
     private final BaseRegisterBank<Integer> addressRegisterBank;
@@ -74,7 +74,7 @@ public class Architecture {
         loadBuffers = new LoadBuffer[config.numberOfLoadBuffers];
         storeBuffers = new StoreBuffer[config.numberOfStoreBuffers];
 
-        var allBuffers = Stream.concat(Arrays.stream(loadBuffers), Arrays.stream(storeBuffers)).toArray(Buffer[]::new);
+        allBuffers = new Buffer[loadBuffers.length + storeBuffers.length];
 
         memoryUnit = new MemoryUnit(commonDataBus);
         addressUnit = new AddressUnit(addressRegisterBank, fpRegisterBank, allBuffers, reorderBuffer);
@@ -128,10 +128,12 @@ public class Architecture {
     private void initBuffers() {
         for (int i = 0; i < loadBuffers.length; i++) {
             loadBuffers[i] = new LoadBuffer(Operation.LOAD.getRepresentation() + i, memoryUnit);
+            allBuffers[i] = loadBuffers[i];
         }
 
         for (int i = 0; i < storeBuffers.length; i++) {
             storeBuffers[i] = new StoreBuffer(Operation.STORE.getRepresentation() + i, memoryUnit);
+            allBuffers[i + loadBuffers.length] = storeBuffers[i];
         }
     }
 
@@ -165,9 +167,9 @@ public class Architecture {
             System.out.println("LOG from architecture:\n\tExecuting << " + instruction + " >>");
 
             if (instruction instanceof RTypeInstruction) {
-                destructureRTypeInstructionAndTryDispatch((RTypeInstruction) instruction);
+                tryDispatchRTypeInstruction((RTypeInstruction) instruction);
             } else {
-                destructureMemTypeInstructionAndTryDispatch((MemoryTypeInstruction) instruction);
+                tryDispatchMemTypeInstruction((MemoryTypeInstruction) instruction);
             }
         }
 
@@ -178,7 +180,7 @@ public class Architecture {
         }
     }
 
-    private void destructureRTypeInstructionAndTryDispatch(RTypeInstruction instruction) {
+    private void tryDispatchRTypeInstruction(RTypeInstruction instruction) {
         var stationName = operationsBus.storeOperationInStationAndMarkItBusy(instruction.getOperation());
 
         if (stationName.isEmpty()) {
@@ -187,13 +189,11 @@ public class Architecture {
         }
 
         var infos = new StationInstructionAndControlInfos(instruction, countDownLatch);
-        reorderBuffer.renameRegister(instruction.getDestinationRegister().getName(), stationName.get());
         operandBusses.storeInfosInStation(infos, stationName.get());
     }
 
-    private void destructureMemTypeInstructionAndTryDispatch(MemoryTypeInstruction instruction) {
+    private void tryDispatchMemTypeInstruction(MemoryTypeInstruction instruction) {
         var infos = new MemoryInstructionAndControlInfos(instruction, countDownLatch);
-        reorderBuffer.renameRegister(instruction.getDestinationRegister().getName(), memoryUnit.getName());
         addressUnit.calculateAddressAndStoreInABuffer(infos);
     }
 }
