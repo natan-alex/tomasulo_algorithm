@@ -3,16 +3,20 @@ package main.java.instructions;
 import java.util.Objects;
 
 import main.java.components.registers.AddressRegister;
+import main.java.components.registers.FPRegister;
 
-public class MemTypeInstruction {
-    private final Operation operation;
+public class MemoryTypeInstruction extends BaseInstruction {
     private final int offset;
     private final AddressRegister baseRegister;
+    private final FPRegister destinationRegister;
 
-    public MemTypeInstruction(
+    public MemoryTypeInstruction(
             Operation operation,
+            FPRegister destinationRegister,
             int offset,
             AddressRegister baseRegister) {
+        super(operation);
+
         if (operation == null || !operation.isLoadOrStore()) {
             throw new IllegalArgumentException("Invalid operation for MEM type instruction");
         }
@@ -21,13 +25,9 @@ public class MemTypeInstruction {
             throw new IllegalArgumentException("Offset cannot be negative");
         }
 
+        this.destinationRegister = Objects.requireNonNull(destinationRegister);
         this.baseRegister = Objects.requireNonNull(baseRegister);
-        this.operation = operation;
         this.offset = offset;
-    }
-
-    public Operation getOperation() {
-        return operation;
     }
 
     public int getOffset() {
@@ -45,4 +45,7 @@ public class MemTypeInstruction {
                 baseRegister.getName();
     }
 
+    public FPRegister getDestinationRegister() {
+        return destinationRegister;
+    }
 }

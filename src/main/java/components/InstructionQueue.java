@@ -6,10 +6,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 
-import main.java.instructions.RTypeInstruction;
+import main.java.instructions.BaseInstruction;
 
-public class InstructionQueue implements Iterable<RTypeInstruction> {
-    private final Queue<RTypeInstruction> instructions;
+public class InstructionQueue implements Iterable<BaseInstruction> {
+    private final Queue<BaseInstruction> instructions;
     private int size;
 
     public InstructionQueue() {
@@ -17,13 +17,13 @@ public class InstructionQueue implements Iterable<RTypeInstruction> {
         size = 0;
     }
 
-    public void enqueue(RTypeInstruction instruction) {
+    public void enqueue(BaseInstruction instruction) {
         Objects.requireNonNull(instruction);
         instructions.add(instruction);
         size++;
     }
 
-    public Optional<RTypeInstruction> dispatch() {
+    public Optional<BaseInstruction> dispatch() {
         var polled = instructions.poll();
 
         if (polled == null) {
@@ -39,7 +39,7 @@ public class InstructionQueue implements Iterable<RTypeInstruction> {
     }
 
     @Override
-    public Iterator<RTypeInstruction> iterator() {
+    public Iterator<BaseInstruction> iterator() {
         return instructions.iterator();
     }
 }

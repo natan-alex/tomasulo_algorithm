@@ -4,49 +4,49 @@ import java.util.Objects;
 
 import main.java.components.registers.FPRegister;
 
-public class RTypeInstruction {
-    private final Operation operation;
-    private final FPRegister destination;
-    private final FPRegister firstOperand;
-    private final FPRegister secondOperand;
+public class RTypeInstruction extends BaseInstruction {
+    private final FPRegister destinationRegister;
+    private final FPRegister firstOperandRegister;
+    private final FPRegister secondOperandRegister;
 
     public RTypeInstruction(
             Operation operation,
-            FPRegister destination,
-            FPRegister firstOperand,
-            FPRegister secondOperand) {
+            FPRegister destinationRegister,
+            FPRegister firstOperandRegister,
+            FPRegister secondOperandRegister) {
+        super(operation);
+
         if (operation == null || operation.isLoadOrStore()) {
             throw new IllegalArgumentException("Invalid operation for R type instruction");
         }
 
-        this.operation = operation;
-        this.destination = Objects.requireNonNull(destination);
-        this.firstOperand = Objects.requireNonNull(firstOperand);
-        this.secondOperand = Objects.requireNonNull(secondOperand);
+        this.destinationRegister = Objects.requireNonNull(destinationRegister);
+        this.firstOperandRegister = Objects.requireNonNull(firstOperandRegister);
+        this.secondOperandRegister = Objects.requireNonNull(secondOperandRegister);
     }
 
     public Operation getOperation() {
         return operation;
     }
 
-    public FPRegister getDestination() {
-        return destination;
+    public FPRegister getDestinationRegister() {
+        return destinationRegister;
     }
 
-    public FPRegister getSecondOperand() {
-        return secondOperand;
+    public FPRegister getFirstOperandRegister() {
+        return firstOperandRegister;
     }
 
-    public FPRegister getFirstOperand() {
-        return firstOperand;
+    public FPRegister getSecondOperandRegister() {
+        return secondOperandRegister;
     }
 
     @Override
     public String toString() {
         return operation + " " +
-                destination.getName() + " " +
-                firstOperand.getName() + " " +
-                secondOperand.getName();
+                destinationRegister.getName() + " " +
+                firstOperandRegister.getName() + " " +
+                secondOperandRegister.getName();
     }
 
 }
