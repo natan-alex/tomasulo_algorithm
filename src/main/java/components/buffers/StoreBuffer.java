@@ -20,7 +20,11 @@ public class StoreBuffer extends Buffer {
     public void handleCalculatedResult(FunctionaUnitBroadcastInfos infos, double calculatedResult) {
         Objects.requireNonNull(infos);
 
-        if (infos.getOriginStationName().equals(componentThatWillProduceValueToStore)) {
+        if (componentThatWillProduceValueToStore != null && 
+            componentThatWillProduceValueToStore.equals(infos.getOriginStationName())) {
+            System.out.println("LOG from " + name + " buffer:"
+                + "\n\tUsing broadcasted value " + calculatedResult + " for operand");
+
             valueToStore = calculatedResult;
             previousInfos.setDestinationRegisterValue(valueToStore);
             memoryUnit.execute(previousInfos);
@@ -42,7 +46,11 @@ public class StoreBuffer extends Buffer {
             return;
         }
 
-        if (infos.getDestinationRegisterNewName().get().equals(componentThatWillProduceValueToStore)) {
+        if (componentThatWillProduceValueToStore != null && 
+            componentThatWillProduceValueToStore.equals(infos.getOriginBufferName())) {
+            System.out.println("LOG from " + name + " buffer:"
+                + "\n\tUsing broadcasted value " + memData + " for operand");
+
             valueToStore = memData;
             previousInfos.setDestinationRegisterValue(valueToStore);
             memoryUnit.execute(previousInfos);
@@ -59,6 +67,10 @@ public class StoreBuffer extends Buffer {
         if (infos.getDestinationRegisterNewName().isPresent()) {
             componentThatWillProduceValueToStore = infos.getDestinationRegisterNewName().get();
         } else {
+            System.out.println("LOG from " + name + " buffer:"
+                    + "\n\tAll operands available: << " + valueToStore + " >> "
+                    + "\n\tPassing to memory unit");
+
             valueToStore = infos.getDestinationRegisterValue().get();
             infos.setDestinationRegisterValue(valueToStore);
             memoryUnit.execute(infos);
