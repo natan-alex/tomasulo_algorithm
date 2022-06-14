@@ -16,9 +16,9 @@ public class StationInstructionAndControlInfos {
             CountDownLatch countDownLatch) {
         Objects.requireNonNull(instruction);
 
-        this.firstOperandName = Objects.requireNonNull(instruction.getFirstOperand().getName());
-        this.secondOperandName = Objects.requireNonNull(instruction.getSecondOperand().getName());
-        this.destinationRegisterName = Objects.requireNonNull(instruction.getDestination().getName());
+        this.firstOperandName = Objects.requireNonNull(instruction.getFirstOperandRegister().getName());
+        this.secondOperandName = Objects.requireNonNull(instruction.getSecondOperandRegister().getName());
+        this.destinationRegisterName = Objects.requireNonNull(instruction.getDestinationRegister().getName());
         this.countDownLatch = Objects.requireNonNull(countDownLatch);
     }
 
