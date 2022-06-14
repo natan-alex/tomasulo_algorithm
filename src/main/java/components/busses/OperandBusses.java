@@ -1,33 +1,39 @@
 package main.java.components.busses;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import main.java.components.registers.BaseRegisterBank;
 import main.java.components.registers.BaseReorderBuffer;
 import main.java.components.stations.Station;
+import main.java.components.stations.StationInstructionAndControlInfos;
 
 public class OperandBusses implements BaseOperandBusses<Double> {
+    private final Station<Double>[] stations;
     private final BaseRegisterBank<Double> registerBank;
     private final BaseReorderBuffer reorderBuffer;
 
     public OperandBusses(
+            Station<Double>[] stations,
             BaseRegisterBank<Double> registerBank,
             BaseReorderBuffer reorderBuffer) {
+        this.stations = Objects.requireNonNull(stations);
         this.registerBank = Objects.requireNonNull(registerBank);
         this.reorderBuffer = Objects.requireNonNull(reorderBuffer);
     }
 
     @Override
-    public void fetchOperandValuesIntoStation(
-            String firstOperandName,
-            String secondOperandName,
-            Station<Double> station) {
-        Objects.requireNonNull(firstOperandName);
-        Objects.requireNonNull(secondOperandName);
-        Objects.requireNonNull(station);
+    public void storeInfosInStation(StationInstructionAndControlInfos infos, String stationName) {
+        Objects.requireNonNull(infos);
 
-        solveFirstOperand(firstOperandName, station);
-        solveSecondOperand(secondOperandName, station);
+        var station = Arrays.stream(stations)
+                .filter(s -> s.getName().equalsIgnoreCase(stationName))
+                .findFirst()
+                .orElseThrow();
+
+        solveFirstOperand(infos.getFirstOperandName(), station);
+        solveSecondOperand(infos.getSecondOperandName(), station);
+        station.dispatchStoredInfosToUnitIfPossibleWith(infos);
     }
 
     private void solveFirstOperand(String firstOperandName, Station<Double> station) {
