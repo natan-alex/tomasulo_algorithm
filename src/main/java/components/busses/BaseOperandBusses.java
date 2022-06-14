@@ -1,10 +1,7 @@
 package main.java.components.busses;
 
-import main.java.components.stations.Station;
+import main.java.components.stations.StationInstructionAndControlInfos;
 
 public interface BaseOperandBusses<T extends Number> {
-    void fetchOperandValuesIntoStation(
-            String firstOperandName,
-            String secondOperandName,
-            Station<T> station);
+    void storeInfosInStation(StationInstructionAndControlInfos infos, String stationName);
 }

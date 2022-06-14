@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import main.java.components.units.FunctionaUnitBroadcastInfos;
+import main.java.components.units.MemoryUnitBroadcastInfos;
 
 public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     public static final String REGISTER_NAME_PREFIX = "F";
@@ -91,8 +92,26 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
             var register = optional.get();
             register.setValue(calculatedResult);
 
-            System.out.println("LOG from fp register bank:\n\tUsing broadcasted value << " + calculatedResult
-                    + " >> to set value for << " + register.getName() + " >>");
+            System.out.println("LOG from fp register bank:"
+                    + "\n\tUsing broadcasted value << " + calculatedResult + " >>"
+                    + " from station << " + infos.getOriginStationName() + " >>"
+                    + " to set value for << " + register.getName() + " >>");
+        }
+    }
+
+    @Override
+    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, double memData) {
+        Objects.requireNonNull(infos);
+
+        var optional = getRegisterWithName(infos.getDestinationRegisterName());
+
+        if (optional.isPresent()) {
+            var register = optional.get();
+            register.setValue(memData);
+
+            System.out.println("LOG from fp register bank:"
+                    + "\n\tUsing broadcasted value << " + memData + " >>"
+                    + " from memory to set value for << " + register.getName() + " >>");
         }
     }
 }

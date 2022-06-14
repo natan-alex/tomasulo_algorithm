@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import main.java.components.units.FunctionaUnitBroadcastInfos;
 import main.java.components.units.FunctionalUnit;
+import main.java.components.units.MemoryUnitBroadcastInfos;
 
 public class ReservationStation extends Station<Double> {
     private StationInstructionAndControlInfos previousInfos;
@@ -69,5 +70,10 @@ public class ReservationStation extends Station<Double> {
         stationThatWillProduceValueForSecondOperand = null;
         operation = null;
         immediateOrAddress = null;
+    }
+
+    @Override
+    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, double memData) {
+        // do nothing
     }
 }
