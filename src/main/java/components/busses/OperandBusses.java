@@ -31,6 +31,7 @@ public class OperandBusses implements BaseOperandBusses<Double> {
                 .findFirst()
                 .orElseThrow();
 
+        reorderBuffer.renameRegister(infos.getDestinationRegisterName(), stationName);
         solveFirstOperand(infos.getFirstOperandName(), station);
         solveSecondOperand(infos.getSecondOperandName(), station);
         station.dispatchStoredInfosToUnitIfPossibleWith(infos);
