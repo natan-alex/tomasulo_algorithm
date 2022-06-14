@@ -43,8 +43,10 @@ public class RTypeInstruction {
 
     @Override
     public String toString() {
-        return "RTypeInstruction [destination=" + destination + ", firstOperand=" + firstOperand + ", operation="
-                + operation + ", secondOperand=" + secondOperand + "]";
+        return operation + " " +
+                destination.getName() + " " +
+                firstOperand.getName() + " " +
+                secondOperand.getName();
     }
 
 }

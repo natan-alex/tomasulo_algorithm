@@ -10,9 +10,9 @@ public class MemTypeInstruction {
     private final AddressRegister baseRegister;
 
     public MemTypeInstruction(
-        Operation operation, 
-        int offset, 
-        AddressRegister baseRegister) {
+            Operation operation,
+            int offset,
+            AddressRegister baseRegister) {
         if (operation == null || !operation.isLoadOrStore()) {
             throw new IllegalArgumentException("Invalid operation for MEM type instruction");
         }
@@ -40,7 +40,9 @@ public class MemTypeInstruction {
 
     @Override
     public String toString() {
-        return "MemTypeInstruction [baseRegister=" + baseRegister + ", offset=" + offset + ", operation=" + operation + "]";
+        return operation + " " +
+                offset + " + " +
+                baseRegister.getName();
     }
 
 }
