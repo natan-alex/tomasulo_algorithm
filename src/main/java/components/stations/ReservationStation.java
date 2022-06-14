@@ -57,6 +57,7 @@ public class ReservationStation extends Station<Double> {
                 stationThatWillProduceValueForSecondOperand.equals(infos.getOriginStationName())) {
             System.out.println("LOG from " + name + " station:\n\tUsing broadcasted value " + calculatedResult
                     + " for second operand");
+
             secondOperandValue = calculatedResult;
             dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
         }
