@@ -3,7 +3,6 @@ package main.java.main;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
 
 import main.java.config.Config;
 import main.java.components.InstructionQueue;
@@ -140,14 +139,16 @@ public class Architecture {
     private void addObserversToCommonDataBus() {
         commonDataBus.addObserver(fpRegisterBank);
         commonDataBus.addObserver(reorderBuffer);
-        Arrays.stream(addReservationStations).forEach(commonDataBus::addObserver);
-        Arrays.stream(mulReservationStations).forEach(commonDataBus::addObserver);
-        Arrays.stream(loadBuffers).forEach(commonDataBus::addObserver);
-        Arrays.stream(storeBuffers).forEach(commonDataBus::addObserver);
+        Arrays.stream(allReservationStations).forEach(commonDataBus::addObserver);
+        Arrays.stream(allBuffers).forEach(commonDataBus::addObserver);
     }
 
-    public String[] getRegisterNames() {
+    public String[] getFPRegisterNames() {
         return fpRegisterBank.getRegisterNames();
+    }
+
+    public String[] getAddressRegisterNames() {
+        return addressRegisterBank.getRegisterNames();
     }
 
     public void schedule(RTypeInstruction instruction) {
@@ -164,7 +165,8 @@ public class Architecture {
         countDownLatch = new CountDownLatch(instructionQueue.size());
 
         for (var instruction : instructionQueue) {
-            System.out.println("LOG from architecture:\n\tExecuting << " + instruction + " >>");
+            System.out.println("LOG from ARCHITECTURE:"
+                    + "\n\tExecuting << " + instruction + " >>");
 
             if (instruction instanceof RTypeInstruction) {
                 tryDispatchRTypeInstruction((RTypeInstruction) instruction);
@@ -181,13 +183,7 @@ public class Architecture {
     }
 
     private void tryDispatchRTypeInstruction(RTypeInstruction instruction) {
-        var stationName = operationsBus.storeOperationInStationAndMarkItBusy(instruction.getOperation());
-
-        if (stationName.isEmpty()) {
-            System.out.println("All reservation stations busy :(");
-            return;
-        }
-
+        var stationName = operationsBus.tryStoreOperationInStationAndMarkItBusy(instruction.getOperation());
         var infos = new StationInstructionAndControlInfos(instruction, countDownLatch);
         operandBusses.storeInfosInStation(infos, stationName.get());
     }
