@@ -3,6 +3,7 @@ package main.java.components.busses;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import main.java.components.units.FunctionaUnitBroadcastInfos;
 import main.java.components.units.MemoryUnitBroadcastInfos;
@@ -26,7 +27,7 @@ public abstract class DataBus {
         }
     }
 
-    public void notifyObserversWith(MemoryUnitBroadcastInfos infos, double memData) {
+    public void notifyObserversWith(MemoryUnitBroadcastInfos infos, Optional<Double> memData) {
         Objects.requireNonNull(infos);
 
         for (var observer : observers) {
