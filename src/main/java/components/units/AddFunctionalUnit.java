@@ -8,10 +8,17 @@ import main.java.instructions.Operation;
 public class AddFunctionalUnit extends FunctionalUnit {
     private static final Operation[] ALLOWED_OPERATIONS = new Operation[] { Operation.ADD, Operation.SUB };
 
+    private final int cyclesToPerformAnAdd;
+    private final int cyclesToPerformASub;
+
     public AddFunctionalUnit(
             String unitName,
+            int cyclesToPerformAnAdd,
+            int cyclesToPerformASub,
             DataBus dataBus) {
-        super(unitName, 2, dataBus);
+        super(unitName, dataBus);
+        this.cyclesToPerformAnAdd = cyclesToPerformAnAdd;
+        this.cyclesToPerformASub = cyclesToPerformASub;
     }
 
     @Override
@@ -35,5 +42,14 @@ public class AddFunctionalUnit extends FunctionalUnit {
     @Override
     public Operation[] getAllowedOperations() {
         return ALLOWED_OPERATIONS;
+    }
+
+    @Override
+    protected int getCyclesToPerformOperation(Operation operation) {
+        if (operation == null || !operation.isAddOrSub()) {
+            throw new IllegalArgumentException("Illegal operation for add unit");
+        }
+
+        return operation == Operation.ADD ? cyclesToPerformAnAdd : cyclesToPerformASub;
     }
 }

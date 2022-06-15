@@ -65,7 +65,7 @@ public class Architecture {
         fpRegisterBank = new FPRegisterBank(config.numberOfFloatingPointRegisters);
         fpRegisterBank.setRandomValuesInRegisters();
 
-        addressRegisterBank = new AddressRegisterBank(5);
+        addressRegisterBank = new AddressRegisterBank(config.numberOfAddressRegisters);
         addressRegisterBank.setRandomValuesInRegisters();
 
         reorderBuffer = new ReorderBuffer(fpRegisterBank);
@@ -75,7 +75,7 @@ public class Architecture {
 
         allBuffers = new Buffer[loadBuffers.length + storeBuffers.length];
 
-        memoryUnit = new MemoryUnit(commonDataBus);
+        memoryUnit = new MemoryUnit(commonDataBus, config.cyclesToPerformALoad, config.cyclesToPerformAStore);
         addressUnit = new AddressUnit(addressRegisterBank, fpRegisterBank, allBuffers, reorderBuffer);
 
         fpAdders = new AddFunctionalUnit[config.numberOfAddStations];
@@ -87,8 +87,8 @@ public class Architecture {
         allReservationStations = new ReservationStation[addReservationStations.length + mulReservationStations.length];
 
         initBuffers();
-        initAddersAndRelatedStations();
-        initMultipliersAndRelatedStations();
+        initAddersAndRelatedStations(config);
+        initMultipliersAndRelatedStations(config);
 
         operationsBus = new OperationsBus(allReservationStations);
         operandBusses = new OperandBusses(allReservationStations, fpRegisterBank, reorderBuffer);
@@ -96,10 +96,12 @@ public class Architecture {
         addObserversToCommonDataBus();
     }
 
-    private void initAddersAndRelatedStations() {
+    private void initAddersAndRelatedStations(Config config) {
         for (int i = 0; i < addReservationStations.length; i++) {
             fpAdders[i] = new AddFunctionalUnit(
                     Operation.ADD.getRepresentation() + i,
+                    config.cyclesToPerformAnAdd,
+                    config.cyclesToPerformASub,
                     commonDataBus);
 
             addReservationStations[i] = new ReservationStation(
@@ -110,10 +112,12 @@ public class Architecture {
         }
     }
 
-    private void initMultipliersAndRelatedStations() {
+    private void initMultipliersAndRelatedStations(Config config) {
         for (int i = 0; i < mulReservationStations.length; i++) {
             fpMultipliers[i] = new MulFunctionalUnit(
                     Operation.MUL.getRepresentation() + i,
+                    config.cyclesToPerformAMul,
+                    config.cyclesToPerformADiv,
                     commonDataBus);
 
             mulReservationStations[i] = new ReservationStation(
@@ -175,11 +179,7 @@ public class Architecture {
             }
         }
 
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        awaitCountDownLatch();
     }
 
     private void tryDispatchRTypeInstruction(RTypeInstruction instruction) {
@@ -191,5 +191,13 @@ public class Architecture {
     private void tryDispatchMemTypeInstruction(MemoryTypeInstruction instruction) {
         var infos = new MemoryInstructionAndControlInfos(instruction, countDownLatch);
         addressUnit.calculateAddressAndStoreInABuffer(infos);
+    }
+
+    private void awaitCountDownLatch() {
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

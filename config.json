@@ -1,5 +1,8 @@
 {
-    "numberOfFloatingPointRegisters": 7,
+    "registers": {
+        "numberOfFloatingPointRegisters": 7,
+        "numberOfAddressRegisters": 7
+    },
     "buffers": {
         "numberOfLoadBuffers": 3,
         "numberOfStoreBuffers": 3
@@ -7,5 +10,13 @@
     "reservationStations": {
         "numberOfMulStations": 2,
         "numberOfAddStations": 5
+    },
+    "cycles": {
+        "cyclesToPerformAnAdd": 2,
+        "cyclesToPerformASub": 3,
+        "cyclesToPerformAMul": 5,
+        "cyclesToPerformADiv": 8,
+        "cyclesToPerformALoad": 3,
+        "cyclesToPerformAStore": 3
     }
 }

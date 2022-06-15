@@ -8,26 +8,21 @@ import main.java.instructions.Operation;
 public abstract class FunctionalUnit {
     private final String name;
     private final DataBus commonDataBus;
-    private final int timeToCalculateResult;
 
     private Thread thread;
 
     public FunctionalUnit(
             String unitName,
-            int cyclesRequiredToPerformOperation,
             DataBus commonDataBus) {
-        if (cyclesRequiredToPerformOperation <= 0) {
-            throw new IllegalArgumentException("Number of cycles must be greather than 0.");
-        }
-
         this.name = Objects.requireNonNull(unitName);
-        this.timeToCalculateResult = cyclesRequiredToPerformOperation * 1000;
         this.commonDataBus = Objects.requireNonNull(commonDataBus);
     }
 
     public abstract double calculateResultFor(FunctionaUnitBroadcastInfos infos);
 
     public abstract Operation[] getAllowedOperations();
+
+    protected abstract int getCyclesToPerformOperation(Operation operation);
 
     private void waitIfAlive() {
         if (thread != null && thread.isAlive()) {
@@ -54,7 +49,7 @@ public abstract class FunctionalUnit {
                     + "\n\tCalculating result for instruction << " + instruction + " >>");
 
             var result = calculateResultFor(infos);
-            trySleep(timeToCalculateResult);
+            trySleep(getCyclesToPerformOperation(infos.getOperation()) * 1000);
 
             System.out.println("LOG from " + name + " UNIT:"
                     + "\n\tSending result << " + result + " >> to common data bus");

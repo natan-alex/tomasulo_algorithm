@@ -10,17 +10,18 @@ import main.java.instructions.Operation;
 public class MemoryUnit implements BaseMemoryUnit {
     public static final String NAME = "MEMORY UNIT";
     private final DataBus commonDataBus;
-    private final int timeToCalculateResult;
+    private final int timeToPerformALoad;
+    private final int timeToPerformAStore;
 
     private Thread thread;
 
-    public MemoryUnit(DataBus commonDataBus) {
-        // if (cyclesRequiredToPerformOperation <= 0) {
-        // throw new IllegalArgumentException("Number of cycles must be greather than
-        // 0.");
-        // }
+    public MemoryUnit(DataBus commonDataBus, int cyclesToPerformALoad, int cyclesToPerformAStore) {
+        if (cyclesToPerformALoad <= 0 || cyclesToPerformAStore <= 0) {
+            throw new IllegalArgumentException("Number of cycles must be greather than 0.");
+        }
 
-        this.timeToCalculateResult = 3 * 1000;
+        this.timeToPerformALoad = cyclesToPerformALoad * 1000;
+        this.timeToPerformAStore = cyclesToPerformAStore * 1000;
         this.commonDataBus = Objects.requireNonNull(commonDataBus);
     }
 
@@ -56,7 +57,7 @@ public class MemoryUnit implements BaseMemoryUnit {
                 + "\n\tStoring value << " + infos.getDestinationRegisterValue().get() + " >>"
                 + " in memory address << " + infos.getAddress() + " >>");
 
-        trySleep(timeToCalculateResult);
+        trySleep(timeToPerformAStore);
 
         System.out.println("LOG from " + NAME + ":"
                 + "\n\tValue << " + infos.getDestinationRegisterValue().get() + " >>"
@@ -73,7 +74,7 @@ public class MemoryUnit implements BaseMemoryUnit {
                 + " to store in register << " + infos.getDestinationRegisterName() + " >>");
 
         var result = getRandomValueInRange(1, 50);
-        trySleep(timeToCalculateResult);
+        trySleep(timeToPerformALoad);
 
         System.out.println("LOG from " + NAME + ":"
                 + "\n\tSending result << " + result + " >> to common data bus");

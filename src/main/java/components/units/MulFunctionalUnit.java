@@ -8,10 +8,17 @@ import main.java.instructions.Operation;
 public class MulFunctionalUnit extends FunctionalUnit {
     private static final Operation[] ALLOWED_OPERATIONS = new Operation[] { Operation.MUL, Operation.DIV };
 
+    private final int cyclesToPerformADiv;
+    private final int cyclesToPerformAMul;
+
     public MulFunctionalUnit(
             String unitName,
+            int cyclesToPerformAMul,
+            int cyclesToPerformADiv,
             DataBus dataBus) {
-        super(unitName, 4, dataBus);
+        super(unitName, dataBus);
+        this.cyclesToPerformAMul = cyclesToPerformAMul;
+        this.cyclesToPerformADiv = cyclesToPerformADiv;
     }
 
     @Override
@@ -35,5 +42,14 @@ public class MulFunctionalUnit extends FunctionalUnit {
     @Override
     public Operation[] getAllowedOperations() {
         return ALLOWED_OPERATIONS;
+    }
+
+    @Override
+    protected int getCyclesToPerformOperation(Operation operation) {
+        if (operation == null || !operation.isMulOrDiv()) {
+            throw new IllegalArgumentException("Illegal operation for mul unit");
+        }
+
+        return operation == Operation.MUL ? cyclesToPerformAMul : cyclesToPerformADiv;
     }
 }
