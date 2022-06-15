@@ -8,6 +8,8 @@ import java.util.Random;
 public class AddressRegisterBank implements BaseRegisterBank<Integer> {
     public static final String REGISTER_NAME_PREFIX = "R";
 
+    private static final String NAME = "ADDRESS REGISTER BANK";
+
     private final Register<Integer>[] registers;
 
     public AddressRegisterBank(int numberOfRegisters) {
@@ -21,7 +23,7 @@ public class AddressRegisterBank implements BaseRegisterBank<Integer> {
     }
 
     private void initRegisters() {
-        System.out.println("LOG from address register bank:");
+        System.out.println("LOG from " + NAME + ":");
         System.out.print("\tAll registers: ");
 
         for (int i = 0; i < registers.length; i++) {
@@ -35,7 +37,7 @@ public class AddressRegisterBank implements BaseRegisterBank<Integer> {
 
     @Override
     public void setRandomValuesInRegisters() {
-        System.out.println("LOG from address register bank:");
+        System.out.println("LOG from " + NAME + ":");
         System.out.println("\tSetting values for registers:");
 
         var random = new Random();
@@ -50,8 +52,8 @@ public class AddressRegisterBank implements BaseRegisterBank<Integer> {
     @Override
     public String[] getRegisterNames() {
         return Arrays.stream(registers)
-            .map(r -> r.getName())
-            .toArray(String[]::new);
+                .map(r -> r.getName())
+                .toArray(String[]::new);
     }
 
     private Optional<Register<Integer>> getRegisterWithName(String name) {
