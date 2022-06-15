@@ -6,6 +6,8 @@ import main.java.components.busses.DataBus;
 import main.java.instructions.Operation;
 
 public class AddFunctionalUnit extends FunctionalUnit {
+    private static final Operation[] ALLOWED_OPERATIONS = new Operation[] { Operation.ADD, Operation.SUB };
+
     public AddFunctionalUnit(
             String unitName,
             DataBus dataBus) {
@@ -28,5 +30,10 @@ public class AddFunctionalUnit extends FunctionalUnit {
 
         var message = "Illegal operation " + operation.getRepresentation() + " for an ADD unit.";
         throw new IllegalArgumentException(message);
+    }
+
+    @Override
+    public Operation[] getAllowedOperations() {
+        return ALLOWED_OPERATIONS;
     }
 }

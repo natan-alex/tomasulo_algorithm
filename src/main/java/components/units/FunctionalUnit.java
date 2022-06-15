@@ -3,6 +3,7 @@ package main.java.components.units;
 import java.util.Objects;
 
 import main.java.components.busses.DataBus;
+import main.java.instructions.Operation;
 
 public abstract class FunctionalUnit {
     private final String name;
@@ -26,6 +27,8 @@ public abstract class FunctionalUnit {
 
     public abstract double calculateResultFor(FunctionaUnitBroadcastInfos infos);
 
+    public abstract Operation[] getAllowedOperations();
+
     private void waitIfAlive() {
         if (thread != null && thread.isAlive()) {
             try {
@@ -47,13 +50,13 @@ public abstract class FunctionalUnit {
                     + infos.getFirstOperandName() + " "
                     + infos.getSecondOperandName();
 
-            System.out.println("LOG from " + name + " unit:"
+            System.out.println("LOG from " + name + " UNIT:"
                     + "\n\tCalculating result for instruction << " + instruction + " >>");
 
             var result = calculateResultFor(infos);
             trySleep(timeToCalculateResult);
 
-            System.out.println("LOG from " + name + " unit:"
+            System.out.println("LOG from " + name + " UNIT:"
                     + "\n\tSending result << " + result + " >> to common data bus");
 
             infos.getCountDownLatch().countDown();

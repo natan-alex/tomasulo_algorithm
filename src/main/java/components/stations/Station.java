@@ -1,5 +1,6 @@
 package main.java.components.stations;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import main.java.components.busses.BusObserver;
@@ -9,7 +10,7 @@ import main.java.instructions.Operation;
 public abstract class Station<T extends Number> implements BusObserver {
     protected final String name;
     protected boolean isBusy;
-    protected Operation operation;
+    protected Operation operationBeingExecuted;
     protected T firstOperandValue;
     protected T secondOperandValue;
     protected String stationThatWillProduceValueForFirstOperand;
@@ -21,13 +22,20 @@ public abstract class Station<T extends Number> implements BusObserver {
         this.name = Objects.requireNonNull(name);
         this.relatedUnit = Objects.requireNonNull(unit);
         this.isBusy = false;
-        this.operation = null;
+        this.operationBeingExecuted = null;
         this.firstOperandValue = null;
         this.secondOperandValue = null;
         this.immediateOrAddress = null;
     }
 
     public abstract void dispatchStoredInfosToUnitIfPossibleWith(StationInstructionAndControlInfos infos);
+
+    public boolean isOperationAllowed(Operation operation) {
+        Objects.requireNonNull(operation);
+
+        return Arrays.stream(relatedUnit.getAllowedOperations())
+                .anyMatch(o -> o == operation);
+    }
 
     public String getName() {
         return name;
@@ -41,12 +49,12 @@ public abstract class Station<T extends Number> implements BusObserver {
         this.isBusy = isBusy;
     }
 
-    public Operation getOperation() {
-        return operation;
+    public Operation getOperationBeingExecuted() {
+        return operationBeingExecuted;
     }
 
-    public void setOperation(Operation operation) {
-        this.operation = operation;
+    public void setOperationBeingExecuted(Operation operation) {
+        this.operationBeingExecuted = operation;
     }
 
     public Object getImmediateOrAddress() {

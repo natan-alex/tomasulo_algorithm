@@ -6,6 +6,8 @@ import main.java.components.busses.DataBus;
 import main.java.instructions.Operation;
 
 public class MulFunctionalUnit extends FunctionalUnit {
+    private static final Operation[] ALLOWED_OPERATIONS = new Operation[] { Operation.MUL, Operation.DIV };
+
     public MulFunctionalUnit(
             String unitName,
             DataBus dataBus) {
@@ -28,5 +30,10 @@ public class MulFunctionalUnit extends FunctionalUnit {
 
         var message = "Illegal operation " + operation.getRepresentation() + " for a MUL unit.";
         throw new IllegalArgumentException(message);
+    }
+
+    @Override
+    public Operation[] getAllowedOperations() {
+        return ALLOWED_OPERATIONS;
     }
 }
