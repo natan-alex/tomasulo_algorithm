@@ -1,6 +1,7 @@
 package main.java.components.stations;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import main.java.components.units.FunctionaUnitBroadcastInfos;
 import main.java.components.units.FunctionalUnit;
@@ -18,14 +19,13 @@ public class ReservationStation extends Station<Double> {
         this.previousInfos = Objects.requireNonNull(infos);
 
         if (firstOperandValue != null && secondOperandValue != null) {
-            System.out.println("LOG from " + name + " station:"
-                    + "\n\tAll operands available: << " + firstOperandValue + " >> "
-                    + "and << " + secondOperandValue + " >>\n\t"
-                    + "Passing to functional unit");
+            System.out.println("LOG from " + name + " STATION:"
+                    + "\n\tAll operands available: << " + firstOperandValue + " >> and << " + secondOperandValue + " >>"
+                    + "\n\tPassing to functional unit");
 
             relatedUnit.execute(new FunctionaUnitBroadcastInfos(
                     name,
-                    operation,
+                    operationBeingExecuted,
                     infos.getDestinationRegisterName(),
                     infos.getFirstOperandName(),
                     firstOperandValue,
@@ -46,8 +46,8 @@ public class ReservationStation extends Station<Double> {
 
         if (stationThatWillProduceValueForFirstOperand != null &&
                 stationThatWillProduceValueForFirstOperand.equals(infos.getOriginStationName())) {
-            System.out.println("LOG from " + name + " station:\n\tUsing broadcasted value " + calculatedResult
-                    + " for first operand");
+            System.out.println("LOG from " + name + " STATION:"
+                    + "\n\tUsing broadcasted value << " + calculatedResult + " >> for first operand");
 
             firstOperandValue = calculatedResult;
             dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
@@ -55,10 +55,33 @@ public class ReservationStation extends Station<Double> {
 
         if (stationThatWillProduceValueForSecondOperand != null &&
                 stationThatWillProduceValueForSecondOperand.equals(infos.getOriginStationName())) {
-            System.out.println("LOG from " + name + " station:\n\tUsing broadcasted value " + calculatedResult
-                    + " for second operand");
+            System.out.println("LOG from " + name + " STATION:"
+                    + "\n\tUsing broadcasted value << " + calculatedResult + " >> for second operand");
 
             secondOperandValue = calculatedResult;
+            dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
+        }
+    }
+
+    @Override
+    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, Optional<Double> memData) {
+        Objects.requireNonNull(infos);
+
+        if (stationThatWillProduceValueForFirstOperand != null &&
+                stationThatWillProduceValueForFirstOperand.equals(infos.getOriginBufferName())) {
+            System.out.println("LOG from " + name + " STATION:"
+                    + "\n\tUsing broadcasted value << " + memData.get() + " >> for first operand");
+
+            firstOperandValue = memData.get();
+            dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
+        }
+
+        if (stationThatWillProduceValueForSecondOperand != null &&
+                stationThatWillProduceValueForSecondOperand.equals(infos.getOriginBufferName())) {
+            System.out.println("LOG from " + name + " STATION:"
+                    + "\n\tUsing broadcasted value << " + memData.get() + " >> for second operand");
+
+            secondOperandValue = memData.get();
             dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
         }
     }
@@ -69,12 +92,7 @@ public class ReservationStation extends Station<Double> {
         secondOperandValue = null;
         stationThatWillProduceValueForFirstOperand = null;
         stationThatWillProduceValueForSecondOperand = null;
-        operation = null;
+        operationBeingExecuted = null;
         immediateOrAddress = null;
-    }
-
-    @Override
-    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, double memData) {
-        // do nothing
     }
 }

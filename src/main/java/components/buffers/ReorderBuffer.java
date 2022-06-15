@@ -62,7 +62,7 @@ public class ReorderBuffer implements BaseReorderBuffer {
     }
 
     @Override
-    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, double memData) {
+    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, Optional<Double> memData) {
         markRegisterAsNotRenamed(infos.getDestinationRegisterName());
     }
 
@@ -70,7 +70,7 @@ public class ReorderBuffer implements BaseReorderBuffer {
         var optional = originalAndCurrentNamesOfRegisters.get(registerName);
 
         if (optional.isPresent()) {
-            System.out.println("LOG from reorder buffer:"
+            System.out.println("LOG from REORDER BUFFER:"
                     + "\n\tMarking << " + registerName + " >>"
                     + " as if it was not renamed");
 

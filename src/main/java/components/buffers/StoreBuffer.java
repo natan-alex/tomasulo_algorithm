@@ -1,6 +1,7 @@
 package main.java.components.buffers;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import main.java.components.units.BaseMemoryUnit;
 import main.java.components.units.FunctionaUnitBroadcastInfos;
@@ -10,7 +11,6 @@ import main.java.instructions.Operation;
 public class StoreBuffer extends Buffer {
     private String componentThatWillProduceValueToStore;
     private MemoryUnitBroadcastInfos previousInfos;
-    private double valueToStore;
 
     public StoreBuffer(String name, BaseMemoryUnit memoryUnit) {
         super(name, Operation.STORE, memoryUnit);
@@ -20,25 +20,24 @@ public class StoreBuffer extends Buffer {
     public void handleCalculatedResult(FunctionaUnitBroadcastInfos infos, double calculatedResult) {
         Objects.requireNonNull(infos);
 
-        if (componentThatWillProduceValueToStore != null && 
-            componentThatWillProduceValueToStore.equals(infos.getOriginStationName())) {
+        if (componentThatWillProduceValueToStore != null &&
+                componentThatWillProduceValueToStore.equals(infos.getOriginStationName())) {
             System.out.println("LOG from " + name + " buffer:"
-                + "\n\tUsing broadcasted value " + calculatedResult + " for operand");
+                    + "\n\tUsing broadcasted value << " + calculatedResult + " >> for operand");
 
-            valueToStore = calculatedResult;
-            previousInfos.setDestinationRegisterValue(valueToStore);
+            previousInfos.setDestinationRegisterValue(calculatedResult);
             memoryUnit.execute(previousInfos);
         }
     }
 
     private void clearBuffer() {
         isBusy = false;
-        valueToStore = 0;
         componentThatWillProduceValueToStore = null;
+        previousInfos = null;
     }
 
     @Override
-    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, double memData) {
+    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, Optional<Double> memData) {
         Objects.requireNonNull(infos);
 
         if (infos.getOriginBufferName().equals(name)) {
@@ -46,13 +45,12 @@ public class StoreBuffer extends Buffer {
             return;
         }
 
-        if (componentThatWillProduceValueToStore != null && 
-            componentThatWillProduceValueToStore.equals(infos.getOriginBufferName())) {
+        if (componentThatWillProduceValueToStore != null &&
+                componentThatWillProduceValueToStore.equals(infos.getOriginBufferName())) {
             System.out.println("LOG from " + name + " buffer:"
-                + "\n\tUsing broadcasted value " + memData + " for operand");
+                    + "\n\tUsing broadcasted value " + memData + " for operand");
 
-            valueToStore = memData;
-            previousInfos.setDestinationRegisterValue(valueToStore);
+            previousInfos.setDestinationRegisterValue(memData.orElseThrow());
             memoryUnit.execute(previousInfos);
         }
     }
@@ -68,11 +66,9 @@ public class StoreBuffer extends Buffer {
             componentThatWillProduceValueToStore = infos.getDestinationRegisterNewName().get();
         } else {
             System.out.println("LOG from " + name + " buffer:"
-                    + "\n\tAll operands available: << " + valueToStore + " >> "
+                    + "\n\tAll operands available: << " + infos.getDestinationRegisterValue().get() + " >> "
                     + "\n\tPassing to memory unit");
 
-            valueToStore = infos.getDestinationRegisterValue().get();
-            infos.setDestinationRegisterValue(valueToStore);
             memoryUnit.execute(infos);
         }
     }

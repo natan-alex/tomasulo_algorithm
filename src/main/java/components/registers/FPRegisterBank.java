@@ -10,6 +10,7 @@ import main.java.components.units.MemoryUnitBroadcastInfos;
 
 public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     public static final String REGISTER_NAME_PREFIX = "F";
+    private static final String NAME = "FP REGISTER BANK";
 
     private final Register<Double>[] registers;
 
@@ -24,7 +25,7 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     }
 
     private void initRegisters() {
-        System.out.println("LOG from fp register bank:");
+        System.out.println("LOG from " + NAME + ":");
         System.out.print("\tAll registers: ");
 
         for (int i = 0; i < registers.length; i++) {
@@ -38,7 +39,7 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
 
     @Override
     public void setRandomValuesInRegisters() {
-        System.out.println("LOG from fp register bank:");
+        System.out.println("LOG from " + NAME + ":");
         System.out.println("\tSetting values for registers:");
 
         var random = new Random();
@@ -92,7 +93,7 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
             var register = optional.get();
             register.setValue(calculatedResult);
 
-            System.out.println("LOG from fp register bank:"
+            System.out.println("LOG from " + NAME + ":"
                     + "\n\tUsing broadcasted value << " + calculatedResult + " >>"
                     + " from station << " + infos.getOriginStationName() + " >>"
                     + " to set value for << " + register.getName() + " >>");
@@ -100,18 +101,17 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
     }
 
     @Override
-    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, double memData) {
+    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, Optional<Double> memData) {
         Objects.requireNonNull(infos);
 
-        var optional = getRegisterWithName(infos.getDestinationRegisterName());
+        var register = getRegisterWithName(infos.getDestinationRegisterName());
 
-        if (optional.isPresent()) {
-            var register = optional.get();
-            register.setValue(memData);
+        if (register.isPresent() && memData.isPresent()) {
+            register.get().setValue(memData.get());
 
-            System.out.println("LOG from fp register bank:"
-                    + "\n\tUsing broadcasted value << " + memData + " >>"
-                    + " from memory to set value for << " + register.getName() + " >>");
+            System.out.println("LOG from " + NAME + ":"
+                    + "\n\tUsing broadcasted value << " + memData.get() + " >>"
+                    + " from memory to set value for << " + register.get().getName() + " >>");
         }
     }
 }

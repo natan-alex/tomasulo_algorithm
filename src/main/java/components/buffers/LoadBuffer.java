@@ -1,6 +1,7 @@
 package main.java.components.buffers;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import main.java.components.units.BaseMemoryUnit;
 import main.java.components.units.FunctionaUnitBroadcastInfos;
@@ -20,10 +21,6 @@ public class LoadBuffer extends Buffer {
         return address;
     }
 
-    public void setAddress(int address) {
-        this.address = address;
-    }
-
     @Override
     public void storeInfosAndSendToMemoryUnit(MemoryUnitBroadcastInfos infos) {
         Objects.requireNonNull(infos);
@@ -39,7 +36,7 @@ public class LoadBuffer extends Buffer {
     }
 
     @Override
-    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, double memData) {
+    public void handleGotMemoryData(MemoryUnitBroadcastInfos infos, Optional<Double> memData) {
         Objects.requireNonNull(infos);
 
         if (infos.getOriginBufferName().equals(name)) {
