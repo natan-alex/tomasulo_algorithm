@@ -15,19 +15,20 @@ public class OperationsBus implements BaseOperationsBus<Double> {
     }
 
     @Override
-    public Optional<String> storeOperationInStationAndMarkItBusy(Operation operation) {
+    public Optional<String> tryStoreOperationInStationAndMarkItBusy(Operation operation) {
         Objects.requireNonNull(operation);
 
         var optional = Arrays.stream(stations)
-                .filter(s -> !s.isBusy())
+                .filter(s -> !s.isBusy() && s.isOperationAllowed(operation))
                 .findFirst();
 
         if (optional.isEmpty()) {
+            System.out.println("All reservation stations are busy :(");
             return Optional.empty();
         }
 
         var station = optional.get();
-        station.setOperation(operation);
+        station.setOperationBeingExecuted(operation);
         station.setBusy(true);
 
         return Optional.of(station.getName());
