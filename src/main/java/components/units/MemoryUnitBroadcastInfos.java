@@ -20,8 +20,8 @@ public class MemoryUnitBroadcastInfos {
             Operation operation,
             String originBufferName,
             String destinationRegisterName,
-            Optional<Double> destinationRegisterValue,
             Optional<String> destinationRegisterNewName,
+            Optional<Double> destinationRegisterValue,
             CountDownLatch countDownLatch) {
         this.address = address;
         this.operation = Objects.requireNonNull(operation);
@@ -29,7 +29,7 @@ public class MemoryUnitBroadcastInfos {
         this.destinationRegisterName = Objects.requireNonNull(destinationRegisterName);
         this.countDownLatch = Objects.requireNonNull(countDownLatch);
         this.destinationRegisterValue = Objects.requireNonNull(destinationRegisterValue);
-        this.destinationRegisterNewName = Objects.requireNonNull(destinationRegisterNewName);
+        this.destinationRegisterNewName = destinationRegisterNewName;
     }
 
     public String getDestinationRegisterName() {
@@ -48,10 +48,6 @@ public class MemoryUnitBroadcastInfos {
         return operation;
     }
 
-    public Optional<String> getDestinationRegisterNewName() {
-        return destinationRegisterNewName;
-    }
-
     public String getOriginBufferName() {
         return originBufferName;
     }
@@ -60,8 +56,11 @@ public class MemoryUnitBroadcastInfos {
         return destinationRegisterValue;
     }
 
-    public void setDestinationRegisterValue(double destinationRegisterValue) {
-        this.destinationRegisterValue = Optional.of(destinationRegisterValue);
+    public Optional<String> getDestinationRegisterNewName() {
+        return destinationRegisterNewName;
     }
 
+    public void setDestinationRegisterValue(double valueToStore) {
+        destinationRegisterValue = Optional.of(valueToStore);
+    }
 }
