@@ -10,7 +10,8 @@ import main.java.components.registers.BaseReorderBuffer;
 import main.java.instructions.Operation;
 
 public class AddressUnit implements BaseAddressUnit {
-    public static final String NAME = "Address unit";
+    public static final String NAME = "ADDRESS UNIT";
+
     private final BaseRegisterBank<Integer> addressRegisterBank;
     private final Buffer[] buffers;
     private final BaseReorderBuffer reorderBuffer;
@@ -31,32 +32,47 @@ public class AddressUnit implements BaseAddressUnit {
     public void calculateAddressAndStoreInABuffer(MemoryInstructionAndControlInfos infos) {
         Objects.requireNonNull(infos);
 
+        var buffer = getANotBusyBufferForOperation(infos.getOperation());
+
+        if (buffer.isEmpty()) {
+            System.out.println("All buffers are busy :(");
+            return;
+        }
+
+        System.out.println("LOG from " + NAME + ":"
+                + "\n\tReceived offset << " + infos.getOffset() + " >>"
+                + " and base register << " + infos.getBaseRegisterName() + " >>"
+                + "\n\tCalculating address");
+
+        var allInfos = new MemoryUnitBroadcastInfos(
+                calculateAddress(infos),
+                infos.getOperation(),
+                buffer.get().getName(),
+                infos.getDestinationRegisterName(),
+                reorderBuffer.getNewNameForRegister(infos.getDestinationRegisterName()),
+                fpRegisterBank.getRegisterValue(infos.getDestinationRegisterName()),
+                infos.getCountDownLatch());
+
+        reorderBuffer.renameRegister(infos.getDestinationRegisterName(), buffer.get().getName());
+
+        buffer.get().storeInfosAndSendToMemoryUnit(allInfos);
+    }
+
+    private Optional<Buffer> getANotBusyBufferForOperation(Operation operation) {
+        return Arrays.stream(buffers)
+                .filter(b -> !b.isBusy() && b.getOperation() == operation)
+                .findFirst();
+    }
+
+    private int calculateAddress(MemoryInstructionAndControlInfos infos) {
         var baseRegisterValue = addressRegisterBank
                 .getRegisterValue(infos.getBaseRegisterName())
                 .orElseThrow();
 
-        var allInfos = new MemoryUnitBroadcastInfos(
-                infos.getOffset() + baseRegisterValue,
-                infos.getOperation(),
-                NAME,
-                infos.getDestinationRegisterName(),
-                fpRegisterBank.getRegisterValue(infos.getDestinationRegisterName()),
-                reorderBuffer.getNewNameForRegister(infos.getDestinationRegisterName()),
-                infos.getCountDownLatch());
+        System.out.println("LOG from " + NAME + ":"
+                + "\n\tValue for << " + infos.getBaseRegisterName() + " >>"
+                + " fetched: << " + baseRegisterValue + " >>");
 
-        var buffer = getNotBusyBufferForOperation(infos.getOperation());
-
-        if (buffer.isPresent()) {
-            reorderBuffer.renameRegister(infos.getDestinationRegisterName(), MemoryUnit.NAME);
-            buffer.get().storeInfosAndSendToMemoryUnit(allInfos);
-        } else {
-            System.out.println("All buffers are busy :(");
-        }
-    }
-
-    private Optional<Buffer> getNotBusyBufferForOperation(Operation operation) {
-        return Arrays.stream(buffers)
-                .filter(b -> !b.isBusy() && b.getOperation() == operation)
-                .findFirst();
+        return infos.getOffset() + baseRegisterValue;
     }
 }
