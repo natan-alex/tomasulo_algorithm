@@ -11,17 +11,19 @@ public class Main {
     public static void main(String[] args) throws Exception {
         var config = ConfigParser.parse();
         var architecture = new Architecture(config);
-        var registers = architecture.getRegisterNames();
 
-        var r0 = new FPRegister(registers[0]);
-        var r1 = new FPRegister(registers[1]);
-        var r2 = new FPRegister(registers[2]);
-        var r3 = new FPRegister(registers[3]);
-        var r4 = new FPRegister(registers[4]);
-        var r5 = new FPRegister(registers[5]);
-        var r6 = new FPRegister(registers[6]);
+        var fpRegisters = architecture.getFPRegisterNames();
+        var addressRegisters = architecture.getAddressRegisterNames();
 
-        var m0 = new AddressRegister("R0");
+        var r0 = new FPRegister(fpRegisters[0]);
+        var r1 = new FPRegister(fpRegisters[1]);
+        var r2 = new FPRegister(fpRegisters[2]);
+        var r3 = new FPRegister(fpRegisters[3]);
+        var r4 = new FPRegister(fpRegisters[4]);
+        var r5 = new FPRegister(fpRegisters[5]);
+        var r6 = new FPRegister(fpRegisters[6]);
+
+        var m0 = new AddressRegister(addressRegisters[0]);
 
         var i0 = new RTypeInstruction(
                 Operation.ADD,
@@ -47,12 +49,22 @@ public class Main {
                 Operation.LOAD,
                 r3, 30, m0);
 
+        var i6 = new RTypeInstruction(
+                Operation.ADD,
+                r3, r1, r0);
+
+        var i7 = new MemoryTypeInstruction(
+                Operation.STORE,
+                r3, 50, m0);
+
         architecture.schedule(i0);
         architecture.schedule(i1);
         architecture.schedule(i2);
         architecture.schedule(i3);
         architecture.schedule(i4);
         architecture.schedule(i5);
+        architecture.schedule(i6);
+        architecture.schedule(i7);
 
         architecture.startExecution();
     }
