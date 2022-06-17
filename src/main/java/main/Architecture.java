@@ -169,8 +169,8 @@ public class Architecture {
         countDownLatch = new CountDownLatch(instructionQueue.size());
 
         for (var instruction : instructionQueue) {
-            System.out.println("LOG from ARCHITECTURE:"
-                    + "\n\tExecuting << " + instruction + " >>");
+            System.out.println("\nLOG from ARCHITECTURE:"
+                    + "\n\tExecuting << " + instruction + " >>\n");
 
             if (instruction instanceof RTypeInstruction) {
                 tryDispatchRTypeInstruction((RTypeInstruction) instruction);

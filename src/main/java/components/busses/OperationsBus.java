@@ -31,6 +31,9 @@ public class OperationsBus implements BaseOperationsBus<Double> {
         station.setOperationBeingExecuted(operation);
         station.setBusy(true);
 
+        System.out.println("LOG from OPERATIONS BUS:"
+            + "\n\tStoring operation << " + operation + " >> in station << " + station.getName() + " >> and marking it as busy");
+
         return Optional.of(station.getName());
     }
 }

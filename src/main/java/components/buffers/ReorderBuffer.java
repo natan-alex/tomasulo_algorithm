@@ -6,12 +6,16 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.print.attribute.standard.MediaSize.NA;
+
 import main.java.components.registers.BaseRegisterBank;
 import main.java.components.registers.BaseReorderBuffer;
 import main.java.components.units.FunctionaUnitBroadcastInfos;
 import main.java.components.units.MemoryUnitBroadcastInfos;
 
 public class ReorderBuffer implements BaseReorderBuffer {
+    private static final String NAME = "REORDER BUFFER";
+
     private final Map<String, Optional<String>> originalAndCurrentNamesOfRegisters;
 
     public ReorderBuffer(BaseRegisterBank<?> registerBank) {
@@ -54,6 +58,9 @@ public class ReorderBuffer implements BaseReorderBuffer {
         throwIfNullOrDoNotExist(registerName);
 
         originalAndCurrentNamesOfRegisters.put(registerName, Optional.of(newName));
+
+        System.out.println("LOG from " + NAME + ":"
+            + "\n\tRenaming register << " + registerName + " >> to << " + newName + " >>");
     }
 
     @Override
@@ -70,7 +77,7 @@ public class ReorderBuffer implements BaseReorderBuffer {
         var optional = originalAndCurrentNamesOfRegisters.get(registerName);
 
         if (optional.isPresent()) {
-            System.out.println("LOG from REORDER BUFFER:"
+            System.out.println("LOG from " + NAME + ":"
                     + "\n\tMarking << " + registerName + " >>"
                     + " as if it was not renamed");
 

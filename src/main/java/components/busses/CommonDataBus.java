@@ -10,7 +10,7 @@ public class CommonDataBus extends DataBus {
         Objects.requireNonNull(infos);
 
         System.out.println("LOG from COMMON DATA BUS:"
-                + "\n\tBroadcasting calculated value << " + calculatedResult + " >>");
+                + "\n\tBroadcasting value << " + calculatedResult + " >> coming from << " + infos.getOriginStationName() + " >>");
 
         super.notifyObserversWith(infos, calculatedResult);
     }

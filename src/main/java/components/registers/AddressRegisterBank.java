@@ -43,7 +43,7 @@ public class AddressRegisterBank implements BaseRegisterBank<Integer> {
         var random = new Random();
 
         for (var register : registers) {
-            var value = random.nextInt(50 - 1) + 1;
+            var value = random.nextInt(49) + 1;
             register.setValue(value);
             System.out.println("\t\t" + register.getName() + " -> " + register.getValue().get());
         }

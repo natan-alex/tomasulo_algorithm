@@ -9,6 +9,8 @@ import main.java.components.stations.Station;
 import main.java.components.stations.StationInstructionAndControlInfos;
 
 public class OperandBusses implements BaseOperandBusses<Double> {
+    private static final String NAME = "OPERAND BUSSES";
+
     private final Station<Double>[] stations;
     private final BaseRegisterBank<Double> registerBank;
     private final BaseReorderBuffer reorderBuffer;
@@ -32,8 +34,10 @@ public class OperandBusses implements BaseOperandBusses<Double> {
                 .orElseThrow();
 
         reorderBuffer.renameRegister(infos.getDestinationRegisterName(), stationName);
+
         solveFirstOperand(infos.getFirstOperandName(), station);
         solveSecondOperand(infos.getSecondOperandName(), station);
+
         station.dispatchStoredInfosToUnitIfPossibleWith(infos);
     }
 
@@ -42,9 +46,15 @@ public class OperandBusses implements BaseOperandBusses<Double> {
 
         if (newNameForFirstOperand.isPresent()) {
             station.setStationThatWillProduceValueForFirstOperand(newNameForFirstOperand.get());
+
+            System.out.println("LOG from " + NAME + ":"
+                + "\n\tMarking first operand in station << " + station.getName() + " >> to wait for << " + newNameForFirstOperand.get() + " >>");
         } else {
             var value = registerBank.getRegisterValue(firstOperandName).orElseThrow();
             station.setFirstOperandValue(value);
+
+            System.out.println("LOG from " + NAME + ":"
+                + "\n\tSetting value << " + value + " >> for first operand in station << " + station.getName() + " >>");
         }
     }
 
@@ -53,9 +63,15 @@ public class OperandBusses implements BaseOperandBusses<Double> {
 
         if (newNameForSecondOperand.isPresent()) {
             station.setStationThatWillProduceValueForSecondOperand(newNameForSecondOperand.get());
+
+            System.out.println("LOG from " + NAME + ":"
+                + "\n\tMarking second operand in station << " + station.getName() + " >> to wait for << " + newNameForSecondOperand.get() + " >>");
         } else {
             var value = registerBank.getRegisterValue(secondOperandName).orElseThrow();
             station.setSecondOperandValue(value);
+
+            System.out.println("LOG from " + NAME + ":"
+                + "\n\tSetting value << " + value + " >> for second operand in station << " + station.getName() + " >>");
         }
     }
 }

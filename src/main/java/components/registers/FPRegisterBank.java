@@ -45,7 +45,8 @@ public class FPRegisterBank implements BaseRegisterBankObserver<Double> {
         var random = new Random();
 
         for (var register : registers) {
-            register.setValue(5 + 10 * random.nextDouble());
+            var value = 1 + 14 * random.nextDouble();
+            register.setValue(value);
             System.out.println("\t\t" + register.getName() + " -> " + register.getValue().get());
         }
     }
