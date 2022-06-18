@@ -51,7 +51,7 @@ public class Main {
 
         var i6 = new RTypeInstruction(
                 Operation.ADD,
-                r3, r1, r0);
+                r4, r3, r0);
 
         var i7 = new MemoryTypeInstruction(
                 Operation.STORE,
