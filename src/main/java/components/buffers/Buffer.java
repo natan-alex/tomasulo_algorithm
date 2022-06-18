@@ -10,7 +10,7 @@ import main.java.instructions.Operation;
 public abstract class Buffer implements BusObserver {
     protected final String name;
     protected final BaseMemoryUnit memoryUnit;
-    private final Operation operation;
+    protected final Operation operation;
     protected int address;
     protected boolean isBusy;
 
