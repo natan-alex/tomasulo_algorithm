@@ -87,6 +87,10 @@ public class Architecture {
         operationsBus = new OperationsBus(allReservationStations);
         operandBusses = new OperandBusses(allReservationStations, fpRegisterBank, reorderBuffer);
 
+        setup(config);
+    }
+
+    private void setup(Config config) {
         fpRegisterBank.setRandomValuesInRegisters();
         addressRegisterBank.setRandomValuesInRegisters();
 
