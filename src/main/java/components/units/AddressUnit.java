@@ -39,11 +39,6 @@ public class AddressUnit implements BaseAddressUnit {
             return;
         }
 
-        System.out.println("LOG from " + NAME + ":"
-                + "\n\tReceived offset << " + infos.getOffset() + " >>"
-                + " and base register << " + infos.getBaseRegisterName() + " >>"
-                + "\n\tCalculating address");
-
         var allInfos = new MemoryUnitBroadcastInfos(
                 calculateAddress(infos),
                 infos.getOperation(),
@@ -65,6 +60,11 @@ public class AddressUnit implements BaseAddressUnit {
     }
 
     private int calculateAddress(MemoryInstructionAndControlInfos infos) {
+        System.out.println("LOG from " + NAME + ":"
+                + "\n\tReceived offset << " + infos.getOffset() + " >>"
+                + " and base register << " + infos.getBaseRegisterName() + " >>"
+                + "\n\tCalculating address");
+
         var baseRegisterValue = addressRegisterBank
                 .getRegisterValue(infos.getBaseRegisterName())
                 .orElseThrow();
