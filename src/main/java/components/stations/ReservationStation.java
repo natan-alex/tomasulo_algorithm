@@ -8,7 +8,7 @@ import main.java.components.units.FunctionalUnit;
 import main.java.components.units.MemoryUnitBroadcastInfos;
 
 public class ReservationStation extends Station<Double> {
-    private StationInstructionAndControlInfos previousInfos;
+    private StationInstructionAndControlInfos previouslyStoredInfos;
 
     public ReservationStation(String name, FunctionalUnit unit) {
         super(name, unit);
@@ -16,11 +16,12 @@ public class ReservationStation extends Station<Double> {
 
     @Override
     public void dispatchStoredInfosToUnitIfPossibleWith(StationInstructionAndControlInfos infos) {
-        this.previousInfos = Objects.requireNonNull(infos);
+        this.previouslyStoredInfos = Objects.requireNonNull(infos);
 
         if (firstOperandValue != null && secondOperandValue != null) {
             System.out.println("LOG from " + name + " STATION:"
-                    + "\n\tAll operands available: << " + firstOperandValue + " >> and << " + secondOperandValue + " >>"
+                    + "\n\tAll operands available: << " + firstOperandValue + " >>"
+                    + " and << " + secondOperandValue + " >>"
                     + "\n\tPassing to functional unit");
 
             relatedUnit.execute(new FunctionaUnitBroadcastInfos(
@@ -50,7 +51,7 @@ public class ReservationStation extends Station<Double> {
                     + "\n\tUsing broadcasted value << " + calculatedResult + " >> for first operand");
 
             firstOperandValue = calculatedResult;
-            dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
+            dispatchStoredInfosToUnitIfPossibleWith(previouslyStoredInfos);
         }
 
         if (stationThatWillProduceValueForSecondOperand != null &&
@@ -59,7 +60,7 @@ public class ReservationStation extends Station<Double> {
                     + "\n\tUsing broadcasted value << " + calculatedResult + " >> for second operand");
 
             secondOperandValue = calculatedResult;
-            dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
+            dispatchStoredInfosToUnitIfPossibleWith(previouslyStoredInfos);
         }
     }
 
@@ -73,7 +74,7 @@ public class ReservationStation extends Station<Double> {
                     + "\n\tUsing broadcasted value << " + memData.get() + " >> for first operand");
 
             firstOperandValue = memData.get();
-            dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
+            dispatchStoredInfosToUnitIfPossibleWith(previouslyStoredInfos);
         }
 
         if (stationThatWillProduceValueForSecondOperand != null &&
@@ -82,7 +83,7 @@ public class ReservationStation extends Station<Double> {
                     + "\n\tUsing broadcasted value << " + memData.get() + " >> for second operand");
 
             secondOperandValue = memData.get();
-            dispatchStoredInfosToUnitIfPossibleWith(previousInfos);
+            dispatchStoredInfosToUnitIfPossibleWith(previouslyStoredInfos);
         }
     }
 
@@ -93,6 +94,5 @@ public class ReservationStation extends Station<Double> {
         stationThatWillProduceValueForFirstOperand = null;
         stationThatWillProduceValueForSecondOperand = null;
         operationBeingExecuted = null;
-        immediateOrAddress = null;
     }
 }
