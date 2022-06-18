@@ -63,10 +63,8 @@ public class Architecture {
         commonDataBus = new CommonDataBus();
 
         fpRegisterBank = new FPRegisterBank(config.numberOfFloatingPointRegisters);
-        fpRegisterBank.setRandomValuesInRegisters();
 
         addressRegisterBank = new AddressRegisterBank(config.numberOfAddressRegisters);
-        addressRegisterBank.setRandomValuesInRegisters();
 
         reorderBuffer = new ReorderBuffer(fpRegisterBank);
 
@@ -86,13 +84,15 @@ public class Architecture {
 
         allReservationStations = new ReservationStation[addReservationStations.length + mulReservationStations.length];
 
-        initBuffers();
-        initAddersAndRelatedStations(config);
-        initMultipliersAndRelatedStations(config);
-
         operationsBus = new OperationsBus(allReservationStations);
         operandBusses = new OperandBusses(allReservationStations, fpRegisterBank, reorderBuffer);
 
+        fpRegisterBank.setRandomValuesInRegisters();
+        addressRegisterBank.setRandomValuesInRegisters();
+
+        initBuffers();
+        initAddersAndRelatedStations(config);
+        initMultipliersAndRelatedStations(config);
         addObserversToCommonDataBus();
     }
 
@@ -183,7 +183,7 @@ public class Architecture {
     }
 
     private void tryDispatchRTypeInstruction(RTypeInstruction instruction) {
-        var stationName = operationsBus.tryStoreOperationInStationAndMarkItBusy(instruction.getOperation());
+        var stationName = operationsBus.tryStoreOperationInAFreeStationAndMarkItBusy(instruction.getOperation());
         var infos = new StationInstructionAndControlInfos(instruction, countDownLatch);
         operandBusses.storeInfosInStation(infos, stationName.get());
     }
