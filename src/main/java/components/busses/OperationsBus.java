@@ -15,7 +15,7 @@ public class OperationsBus implements BaseOperationsBus<Double> {
     }
 
     @Override
-    public Optional<String> tryStoreOperationInStationAndMarkItBusy(Operation operation) {
+    public Optional<String> tryStoreOperationInAFreeStationAndMarkItBusy(Operation operation) {
         Objects.requireNonNull(operation);
 
         var optional = Arrays.stream(stations)
@@ -32,7 +32,8 @@ public class OperationsBus implements BaseOperationsBus<Double> {
         station.setBusy(true);
 
         System.out.println("LOG from OPERATIONS BUS:"
-            + "\n\tStoring operation << " + operation + " >> in station << " + station.getName() + " >> and marking it as busy");
+                + "\n\tStoring operation << " + operation + " >> in station << " + station.getName()
+                + " >> and marking it as busy");
 
         return Optional.of(station.getName());
     }

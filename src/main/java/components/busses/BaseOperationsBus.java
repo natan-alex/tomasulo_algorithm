@@ -5,5 +5,5 @@ import java.util.Optional;
 import main.java.instructions.Operation;
 
 public interface BaseOperationsBus<T extends Number> {
-    Optional<String> tryStoreOperationInStationAndMarkItBusy(Operation operation);
+    Optional<String> tryStoreOperationInAFreeStationAndMarkItBusy(Operation operation);
 }
