@@ -15,7 +15,6 @@ public abstract class Station<T extends Number> implements BusObserver {
     protected T secondOperandValue;
     protected String stationThatWillProduceValueForFirstOperand;
     protected String stationThatWillProduceValueForSecondOperand;
-    protected Object immediateOrAddress;
     protected FunctionalUnit relatedUnit;
 
     public Station(String name, FunctionalUnit unit) {
@@ -25,7 +24,6 @@ public abstract class Station<T extends Number> implements BusObserver {
         this.operationBeingExecuted = null;
         this.firstOperandValue = null;
         this.secondOperandValue = null;
-        this.immediateOrAddress = null;
     }
 
     public abstract void dispatchStoredInfosToUnitIfPossibleWith(StationInstructionAndControlInfos infos);
@@ -55,14 +53,6 @@ public abstract class Station<T extends Number> implements BusObserver {
 
     public void setOperationBeingExecuted(Operation operation) {
         this.operationBeingExecuted = operation;
-    }
-
-    public Object getImmediateOrAddress() {
-        return immediateOrAddress;
-    }
-
-    public void setImmediateOrAddress(Object immediateOrAddress) {
-        this.immediateOrAddress = immediateOrAddress;
     }
 
     public T getFirstOperandValue() {
