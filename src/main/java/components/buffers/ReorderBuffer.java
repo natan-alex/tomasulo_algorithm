@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.print.attribute.standard.MediaSize.NA;
-
 import main.java.components.registers.BaseRegisterBank;
 import main.java.components.registers.BaseReorderBuffer;
 import main.java.components.units.FunctionaUnitBroadcastInfos;
@@ -60,7 +57,7 @@ public class ReorderBuffer implements BaseReorderBuffer {
         originalAndCurrentNamesOfRegisters.put(registerName, Optional.of(newName));
 
         System.out.println("LOG from " + NAME + ":"
-            + "\n\tRenaming register << " + registerName + " >> to << " + newName + " >>");
+                + "\n\tRenaming register << " + registerName + " >> to << " + newName + " >>");
     }
 
     @Override
