@@ -13,8 +13,6 @@ public class MemoryUnit implements BaseMemoryUnit {
     private final int timeToPerformALoad;
     private final int timeToPerformAStore;
 
-    private Thread thread;
-
     public MemoryUnit(DataBus commonDataBus, int cyclesToPerformALoad, int cyclesToPerformAStore) {
         if (cyclesToPerformALoad <= 0 || cyclesToPerformAStore <= 0) {
             throw new IllegalArgumentException("Number of cycles must be greather than 0.");
@@ -25,34 +23,20 @@ public class MemoryUnit implements BaseMemoryUnit {
         this.commonDataBus = Objects.requireNonNull(commonDataBus);
     }
 
-    private void waitIfAlive() {
-        if (thread != null && thread.isAlive()) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     @Override
     public void execute(MemoryUnitBroadcastInfos infos) {
         Objects.requireNonNull(infos);
 
-        waitIfAlive();
-
-        thread = new Thread(() -> {
+        new Thread(() -> {
             if (infos.getOperation() == Operation.STORE) {
-                executeStoreOperationCode(infos);
+                executeStoreOperationRelatedCode(infos);
             } else {
-                executeLoadOperationCode(infos);
+                executeLoadOperationRelatedCode(infos);
             }
-        });
-
-        thread.start();
+        }).start();
     }
 
-    private void executeStoreOperationCode(MemoryUnitBroadcastInfos infos) {
+    private void executeStoreOperationRelatedCode(MemoryUnitBroadcastInfos infos) {
         System.out.println("LOG from " + NAME + ":"
                 + "\n\tStoring value << " + infos.getDestinationRegisterValue().get() + " >>"
                 + " in memory address << " + infos.getAddress() + " >>");
@@ -68,12 +52,13 @@ public class MemoryUnit implements BaseMemoryUnit {
         commonDataBus.notifyObserversWith(infos, Optional.empty());
     }
 
-    private void executeLoadOperationCode(MemoryUnitBroadcastInfos infos) {
+    private void executeLoadOperationRelatedCode(MemoryUnitBroadcastInfos infos) {
         System.out.println("LOG from " + NAME + ":"
                 + "\n\tGetting value from memory in address << " + infos.getAddress() + " >>"
                 + " to store in register << " + infos.getDestinationRegisterName() + " >>");
 
-        var result = getRandomValueInRange(1, 50);
+        var result = 1 + new Random().nextDouble() * 50;
+
         trySleep(timeToPerformALoad);
 
         System.out.println("LOG from " + NAME + ":"
@@ -81,10 +66,6 @@ public class MemoryUnit implements BaseMemoryUnit {
 
         infos.getCountDownLatch().countDown();
         commonDataBus.notifyObserversWith(infos, Optional.of(result));
-    }
-
-    private double getRandomValueInRange(double min, double max) {
-        return min + new Random().nextDouble() * ((max - min) + 1);
     }
 
     private static void trySleep(int millis) {

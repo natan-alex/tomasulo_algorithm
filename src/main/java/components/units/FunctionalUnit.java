@@ -9,8 +9,6 @@ public abstract class FunctionalUnit {
     private final String name;
     private final DataBus commonDataBus;
 
-    private Thread thread;
-
     public FunctionalUnit(
             String unitName,
             DataBus commonDataBus) {
@@ -24,22 +22,10 @@ public abstract class FunctionalUnit {
 
     protected abstract int getCyclesToPerformOperation(Operation operation);
 
-    private void waitIfAlive() {
-        if (thread != null && thread.isAlive()) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void execute(FunctionaUnitBroadcastInfos infos) {
         Objects.requireNonNull(infos);
 
-        waitIfAlive();
-
-        thread = new Thread(() -> {
+        new Thread(() -> {
             var instruction = infos.getOperation() + " "
                     + infos.getDestinationRegisterName() + " "
                     + infos.getFirstOperandName() + " "
@@ -49,16 +35,15 @@ public abstract class FunctionalUnit {
                     + "\n\tCalculating result for instruction << " + instruction + " >>");
 
             var result = calculateResultFor(infos);
-            trySleep(getCyclesToPerformOperation(infos.getOperation()) * 1000);
+            var timeToPerformOperation = getCyclesToPerformOperation(infos.getOperation()) * 1000;
+            trySleep(timeToPerformOperation);
 
             System.out.println("LOG from " + name + " UNIT:"
                     + "\n\tSending result << " + result + " >> to common data bus");
 
             infos.getCountDownLatch().countDown();
             commonDataBus.notifyObserversWith(infos, result);
-        });
-
-        thread.start();
+        }).start();
     }
 
     private static void trySleep(int millis) {
