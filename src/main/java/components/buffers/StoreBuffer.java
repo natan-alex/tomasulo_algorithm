@@ -10,7 +10,7 @@ import main.java.instructions.Operation;
 
 public class StoreBuffer extends Buffer {
     private String componentThatWillProduceValueToStore;
-    private MemoryUnitBroadcastInfos previousInfos;
+    private MemoryUnitBroadcastInfos previouslyStoreInfos;
 
     public StoreBuffer(String name, BaseMemoryUnit memoryUnit) {
         super(name, Operation.STORE, memoryUnit);
@@ -25,15 +25,15 @@ public class StoreBuffer extends Buffer {
             System.out.println("LOG from " + name + " buffer:"
                     + "\n\tUsing broadcasted value << " + calculatedResult + " >> for operand");
 
-            previousInfos.setDestinationRegisterValue(calculatedResult);
-            memoryUnit.execute(previousInfos);
+            previouslyStoreInfos.setDestinationRegisterValue(calculatedResult);
+            memoryUnit.execute(previouslyStoreInfos);
         }
     }
 
     private void clearBuffer() {
         isBusy = false;
         componentThatWillProduceValueToStore = null;
-        previousInfos = null;
+        previouslyStoreInfos = null;
     }
 
     @Override
@@ -47,23 +47,29 @@ public class StoreBuffer extends Buffer {
 
         if (componentThatWillProduceValueToStore != null &&
                 componentThatWillProduceValueToStore.equals(infos.getOriginBufferName())) {
-            System.out.println("LOG from " + name + " buffer:"
-                    + "\n\tUsing broadcasted value " + memData + " for operand");
+            var value = memData.orElseThrow();
 
-            previousInfos.setDestinationRegisterValue(memData.orElseThrow());
-            memoryUnit.execute(previousInfos);
+            System.out.println("LOG from " + name + " buffer:"
+                    + "\n\tUsing broadcasted value " + value + " for operand");
+
+            previouslyStoreInfos.setDestinationRegisterValue(value);
+            memoryUnit.execute(previouslyStoreInfos);
         }
     }
 
     @Override
     public void storeInfosAndSendToMemoryUnit(MemoryUnitBroadcastInfos infos) {
-        this.previousInfos = Objects.requireNonNull(infos);
+        this.previouslyStoreInfos = Objects.requireNonNull(infos);
 
         isBusy = true;
         address = infos.getAddress();
 
         if (infos.getDestinationRegisterNewName().isPresent()) {
             componentThatWillProduceValueToStore = infos.getDestinationRegisterNewName().get();
+
+            System.out.println("LOG from " + name + " buffer:"
+                    + "\n\tWaiting << " + componentThatWillProduceValueToStore
+                    + " >> to produce value that will be stored in memory");
         } else {
             System.out.println("LOG from " + name + " buffer:"
                     + "\n\tAll operands available: << " + infos.getDestinationRegisterValue().get() + " >> "
