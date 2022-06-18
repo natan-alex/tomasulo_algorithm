@@ -47,7 +47,8 @@ public class AddFunctionalUnit extends FunctionalUnit {
     @Override
     protected int getCyclesToPerformOperation(Operation operation) {
         if (operation == null || !operation.isAddOrSub()) {
-            throw new IllegalArgumentException("Illegal operation for add unit");
+            var message = "Illegal operation " + operation.getRepresentation() + " for an ADD unit.";
+            throw new IllegalArgumentException(message);
         }
 
         return operation == Operation.ADD ? cyclesToPerformAnAdd : cyclesToPerformASub;

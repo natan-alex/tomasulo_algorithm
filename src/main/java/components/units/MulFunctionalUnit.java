@@ -47,7 +47,8 @@ public class MulFunctionalUnit extends FunctionalUnit {
     @Override
     protected int getCyclesToPerformOperation(Operation operation) {
         if (operation == null || !operation.isMulOrDiv()) {
-            throw new IllegalArgumentException("Illegal operation for mul unit");
+            var message = "Illegal operation " + operation.getRepresentation() + " for a MUL unit.";
+            throw new IllegalArgumentException(message);
         }
 
         return operation == Operation.MUL ? cyclesToPerformAMul : cyclesToPerformADiv;
